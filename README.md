@@ -4,6 +4,8 @@ A Material Design Date Picker for the lovely Elm language.
 
 [Check out the demo here](http://abradley2.github.io/elm-datepicker/)
 
+![pretty image](https://i.imgur.com/3o2WoMc.png)
+
 ### Usage
 
 Since this is a material date picker, you will need to have material-icons included.
