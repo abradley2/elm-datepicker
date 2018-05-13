@@ -13892,6 +13892,30 @@ var _user$project$DatePicker$weekSection = F2(
 					}
 				}));
 	});
+var _user$project$DatePicker$getDayMonthText = function (date) {
+	var _p0 = _user$project$DatePicker_Util$getDayInfo(
+		_elm_lang$core$Date$dayOfWeek(date));
+	var dayShort = _p0._0;
+	var dayInt = _p0._1;
+	var _p1 = _user$project$DatePicker_Util$getMonthInfo(
+		_elm_lang$core$Date$month(date));
+	var monthFull = _p1._0;
+	var monthInt = _p1._1;
+	return A2(
+		_elm_lang$core$Basics_ops['++'],
+		dayShort,
+		A2(
+			_elm_lang$core$Basics_ops['++'],
+			', ',
+			A2(
+				_elm_lang$core$Basics_ops['++'],
+				A3(_elm_lang$core$String$slice, 0, 3, monthFull),
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					' ',
+					_elm_lang$core$Basics$toString(
+						_elm_lang$core$Date$day(date))))));
+};
 var _user$project$DatePicker$setDayOfMonth = F2(
 	function (date, num) {
 		return A7(
@@ -13943,10 +13967,29 @@ var _user$project$DatePicker$getColor = F2(
 			'red',
 			A2(_elm_lang$core$Dict$get, color, model.colors));
 	});
-var _user$project$DatePicker$DatePickerModel = F9(
-	function (a, b, c, d, e, f, g, h, i) {
-		return {id: a, today: b, indexDate: c, currentMonthMap: d, previousMonthMap: e, colors: f, selectionMode: g, monthChange: h, yearList: i};
-	});
+var _user$project$DatePicker$DatePickerModel = function (a) {
+	return function (b) {
+		return function (c) {
+			return function (d) {
+				return function (e) {
+					return function (f) {
+						return function (g) {
+							return function (h) {
+								return function (i) {
+									return function (j) {
+										return function (k) {
+											return {id: a, today: b, indexDate: c, currentMonthMap: d, previousMonthMap: e, selectedDate: f, previousSelectedDate: g, colors: h, selectionMode: i, monthChange: j, yearList: k};
+										};
+									};
+								};
+							};
+						};
+					};
+				};
+			};
+		};
+	};
+};
 var _user$project$DatePicker$InitializedModel = function (a) {
 	return function (b) {
 		return function (c) {
@@ -13957,7 +14000,9 @@ var _user$project$DatePicker$InitializedModel = function (a) {
 							return function (h) {
 								return function (i) {
 									return function (j) {
-										return {id: a, today: b, indexDate: c, currentMonthMap: d, previousMonthMap: e, selectedDate: f, colors: g, monthChange: h, yearList: i, selectionMode: j};
+										return function (k) {
+											return {id: a, today: b, indexDate: c, currentMonthMap: d, previousMonthMap: e, selectedDate: f, previousSelectedDate: g, colors: h, monthChange: i, yearList: j, selectionMode: k};
+										};
 									};
 								};
 							};
@@ -13981,217 +14026,201 @@ var _user$project$DatePicker$SetSelectionMode = function (a) {
 };
 var _user$project$DatePicker$headerSection = F2(
 	function (model, props) {
-		var _p0 = model.selectedDate;
-		if (_p0.ctor === 'Just') {
-			var _p3 = _p0._0;
-			var _p1 = _user$project$DatePicker_Util$getDayInfo(
-				_elm_lang$core$Date$dayOfWeek(_p3));
-			var dayShort = _p1._0;
-			var dayInt = _p1._1;
-			var _p2 = _user$project$DatePicker_Util$getMonthInfo(
-				_elm_lang$core$Date$month(_p3));
-			var monthFull = _p2._0;
-			var monthInt = _p2._1;
-			return A2(
-				_elm_lang$html$Html$div,
-				{
+		var _p2 = function () {
+			var _p3 = model.selectedDate;
+			if (_p3.ctor === 'Just') {
+				var _p4 = _p3._0;
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Basics$toString(
+						_elm_lang$core$Date$year(_p4)),
+					_1: _user$project$DatePicker$getDayMonthText(_p4)
+				};
+			} else {
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Basics$toString(
+						_elm_lang$core$Date$year(model.indexDate)),
+					_1: _user$project$DatePicker$getDayMonthText(model.indexDate)
+				};
+			}
+		}();
+		var yearText = _p2._0;
+		var dayMonthText = _p2._1;
+		return A2(
+			_elm_lang$html$Html$div,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$class('edp-header-section'),
+				_1: {
 					ctor: '::',
-					_0: _elm_lang$html$Html_Attributes$class('edp-header-section'),
-					_1: {
+					_0: _elm_lang$html$Html_Attributes$style(
+						{
+							ctor: '::',
+							_0: {
+								ctor: '_Tuple2',
+								_0: 'background-color',
+								_1: A2(_user$project$DatePicker$getColor, model, 'primary')
+							},
+							_1: {ctor: '[]'}
+						}),
+					_1: {ctor: '[]'}
+				}
+			},
+			{
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$div,
+					{
 						ctor: '::',
-						_0: _elm_lang$html$Html_Attributes$style(
+						_0: _elm_lang$html$Html_Attributes$classList(
+							{
+								ctor: '::',
+								_0: {ctor: '_Tuple2', _0: 'edp-header-year', _1: true},
+								_1: {
+									ctor: '::',
+									_0: {
+										ctor: '_Tuple2',
+										_0: 'edp-header-active',
+										_1: A2(
+											_elm_lang$core$Debug$log,
+											'year is active ',
+											_elm_lang$core$Native_Utils.eq(model.selectionMode, _user$project$DatePicker$YearPicker))
+									},
+									_1: {ctor: '[]'}
+								}
+							}),
+						_1: {
+							ctor: '::',
+							_0: _elm_lang$html$Html_Events$onClick(
+								_user$project$DatePicker$SetSelectionMode(_user$project$DatePicker$YearPicker)),
+							_1: {ctor: '[]'}
+						}
+					},
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html$text(yearText),
+						_1: {ctor: '[]'}
+					}),
+				_1: {
+					ctor: '::',
+					_0: A3(
+						_elm_lang$html$Html_Keyed$node,
+						'div',
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('edp-month-day-wrapper'),
+							_1: {ctor: '[]'}
+						},
+						A2(
+							_elm_lang$core$Basics_ops['++'],
 							{
 								ctor: '::',
 								_0: {
 									ctor: '_Tuple2',
-									_0: 'background-color',
-									_1: A2(_user$project$DatePicker$getColor, model, 'primary')
+									_0: dayMonthText,
+									_1: A2(
+										_elm_lang$html$Html$div,
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$classList(
+												{
+													ctor: '::',
+													_0: {ctor: '_Tuple2', _0: 'edp-header-month-day', _1: true},
+													_1: {
+														ctor: '::',
+														_0: {
+															ctor: '_Tuple2',
+															_0: 'edp-header-active',
+															_1: _elm_lang$core$Native_Utils.eq(model.selectionMode, _user$project$DatePicker$Calendar)
+														},
+														_1: {
+															ctor: '::',
+															_0: {ctor: '_Tuple2', _0: 'edp-month-day-next', _1: true},
+															_1: {ctor: '[]'}
+														}
+													}
+												}),
+											_1: {
+												ctor: '::',
+												_0: _elm_lang$html$Html_Events$onClick(
+													_user$project$DatePicker$SetSelectionMode(_user$project$DatePicker$Calendar)),
+												_1: {ctor: '[]'}
+											}
+										},
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html$text(dayMonthText),
+											_1: {ctor: '[]'}
+										})
 								},
 								_1: {ctor: '[]'}
-							}),
-						_1: {ctor: '[]'}
-					}
-				},
-				{
-					ctor: '::',
-					_0: A2(
-						_elm_lang$html$Html$div,
-						{
-							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$classList(
-								{
-									ctor: '::',
-									_0: {ctor: '_Tuple2', _0: 'edp-header-year', _1: true},
-									_1: {
+							},
+							function () {
+								var _p5 = model.previousSelectedDate;
+								if (_p5.ctor === 'Just') {
+									var _p6 = _p5._0;
+									return {
 										ctor: '::',
 										_0: {
 											ctor: '_Tuple2',
-											_0: 'edp-header-active',
+											_0: _user$project$DatePicker$getDayMonthText(_p6),
 											_1: A2(
-												_elm_lang$core$Debug$log,
-												'year is active ',
-												_elm_lang$core$Native_Utils.eq(model.selectionMode, _user$project$DatePicker$YearPicker))
+												_elm_lang$html$Html$div,
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html_Attributes$classList(
+														{
+															ctor: '::',
+															_0: {ctor: '_Tuple2', _0: 'edp-header-month-day', _1: true},
+															_1: {
+																ctor: '::',
+																_0: {
+																	ctor: '_Tuple2',
+																	_0: 'edp-header-active',
+																	_1: _elm_lang$core$Native_Utils.eq(model.selectionMode, _user$project$DatePicker$Calendar)
+																},
+																_1: {
+																	ctor: '::',
+																	_0: {ctor: '_Tuple2', _0: 'edp-month-day-previous', _1: true},
+																	_1: {ctor: '[]'}
+																}
+															}
+														}),
+													_1: {
+														ctor: '::',
+														_0: _elm_lang$html$Html_Events$onClick(
+															_user$project$DatePicker$SetSelectionMode(_user$project$DatePicker$Calendar)),
+														_1: {ctor: '[]'}
+													}
+												},
+												{
+													ctor: '::',
+													_0: _elm_lang$html$Html$text(
+														_user$project$DatePicker$getDayMonthText(_p6)),
+													_1: {ctor: '[]'}
+												})
 										},
 										_1: {ctor: '[]'}
-									}
-								}),
-							_1: {
-								ctor: '::',
-								_0: _elm_lang$html$Html_Events$onClick(
-									_user$project$DatePicker$SetSelectionMode(_user$project$DatePicker$YearPicker)),
-								_1: {ctor: '[]'}
-							}
-						},
-						{
-							ctor: '::',
-							_0: _elm_lang$html$Html$text(
-								_elm_lang$core$Basics$toString(
-									_elm_lang$core$Date$year(_p3))),
-							_1: {ctor: '[]'}
-						}),
-					_1: {
-						ctor: '::',
-						_0: A2(
-							_elm_lang$html$Html$div,
-							{
-								ctor: '::',
-								_0: _elm_lang$html$Html_Attributes$classList(
-									{
-										ctor: '::',
-										_0: {ctor: '_Tuple2', _0: 'edp-header-month-day', _1: true},
-										_1: {
-											ctor: '::',
-											_0: {
-												ctor: '_Tuple2',
-												_0: 'edp-header-active',
-												_1: _elm_lang$core$Native_Utils.eq(model.selectionMode, _user$project$DatePicker$Calendar)
-											},
-											_1: {ctor: '[]'}
-										}
-									}),
-								_1: {
-									ctor: '::',
-									_0: _elm_lang$html$Html_Events$onClick(
-										_user$project$DatePicker$SetSelectionMode(_user$project$DatePicker$Calendar)),
-									_1: {ctor: '[]'}
-								}
-							},
-							{
-								ctor: '::',
-								_0: _elm_lang$html$Html$text(
-									A2(
-										_elm_lang$core$Basics_ops['++'],
-										dayShort,
-										A2(
-											_elm_lang$core$Basics_ops['++'],
-											', ',
-											A2(
-												_elm_lang$core$Basics_ops['++'],
-												A3(_elm_lang$core$String$slice, 0, 3, monthFull),
-												A2(
-													_elm_lang$core$Basics_ops['++'],
-													' ',
-													_elm_lang$core$Basics$toString(
-														_elm_lang$core$Date$day(_p3))))))),
-								_1: {ctor: '[]'}
-							}),
-						_1: {ctor: '[]'}
-					}
-				});
-		} else {
-			return A2(
-				_elm_lang$html$Html$div,
-				{
-					ctor: '::',
-					_0: _elm_lang$html$Html_Attributes$class('edp-header-section'),
-					_1: {
-						ctor: '::',
-						_0: _elm_lang$html$Html_Attributes$style(
-							{
-								ctor: '::',
-								_0: {
-									ctor: '_Tuple2',
-									_0: 'background-color',
-									_1: A2(_user$project$DatePicker$getColor, model, 'primary')
-								},
-								_1: {ctor: '[]'}
-							}),
-						_1: {ctor: '[]'}
-					}
-				},
-				{
-					ctor: '::',
-					_0: A2(
-						_elm_lang$html$Html$div,
-						{
-							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$classList(
-								{
-									ctor: '::',
-									_0: {ctor: '_Tuple2', _0: 'edp-header-year', _1: true},
-									_1: {
+									};
+								} else {
+									return {
 										ctor: '::',
 										_0: {
 											ctor: '_Tuple2',
-											_0: 'edp-header-active',
+											_0: 'empty',
 											_1: A2(
-												_elm_lang$core$Debug$log,
-												'year is active ',
-												_elm_lang$core$Native_Utils.eq(model.selectionMode, _user$project$DatePicker$YearPicker))
+												_elm_lang$html$Html$div,
+												{ctor: '[]'},
+												{ctor: '[]'})
 										},
 										_1: {ctor: '[]'}
-									}
-								}),
-							_1: {
-								ctor: '::',
-								_0: _elm_lang$html$Html_Events$onClick(
-									_user$project$DatePicker$SetSelectionMode(_user$project$DatePicker$YearPicker)),
-								_1: {ctor: '[]'}
-							}
-						},
-						{
-							ctor: '::',
-							_0: _elm_lang$html$Html$text(
-								_elm_lang$core$Basics$toString(
-									_elm_lang$core$Date$year(model.indexDate))),
-							_1: {ctor: '[]'}
-						}),
-					_1: {
-						ctor: '::',
-						_0: A2(
-							_elm_lang$html$Html$div,
-							{
-								ctor: '::',
-								_0: _elm_lang$html$Html_Attributes$classList(
-									{
-										ctor: '::',
-										_0: {ctor: '_Tuple2', _0: 'edp-header-month-day', _1: true},
-										_1: {
-											ctor: '::',
-											_0: {
-												ctor: '_Tuple2',
-												_0: 'edp-header-active',
-												_1: _elm_lang$core$Native_Utils.eq(model.selectionMode, _user$project$DatePicker$Calendar)
-											},
-											_1: {ctor: '[]'}
-										}
-									}),
-								_1: {
-									ctor: '::',
-									_0: _elm_lang$html$Html_Events$onClick(
-										_user$project$DatePicker$SetSelectionMode(_user$project$DatePicker$Calendar)),
-									_1: {ctor: '[]'}
+									};
 								}
-							},
-							{
-								ctor: '::',
-								_0: _elm_lang$html$Html$text('---'),
-								_1: {ctor: '[]'}
-							}),
-						_1: {ctor: '[]'}
-					}
-				});
-		}
+							}())),
+					_1: {ctor: '[]'}
+				}
+			});
 	});
 var _user$project$DatePicker$CancelClicked = {ctor: 'CancelClicked'};
 var _user$project$DatePicker$SubmitClicked = function (a) {
@@ -14248,10 +14277,10 @@ var _user$project$DatePicker$monthChangeSection = F2(
 							ctor: '::',
 							_0: _elm_lang$html$Html$text(
 								function () {
-									var _p4 = _user$project$DatePicker_Util$getMonthInfo(
+									var _p7 = _user$project$DatePicker_Util$getMonthInfo(
 										_elm_lang$core$Date$month(model.indexDate));
-									var monthFull = _p4._0;
-									var monthInt = _p4._1;
+									var monthFull = _p7._0;
+									var monthInt = _p7._1;
 									return A2(
 										_elm_lang$core$Basics_ops['++'],
 										monthFull,
@@ -14418,6 +14447,8 @@ var _user$project$DatePicker$datePickerInit = function (id) {
 			indexDate: _elm_lang$core$Maybe$Nothing,
 			currentMonthMap: _elm_lang$core$Maybe$Nothing,
 			previousMonthMap: _elm_lang$core$Maybe$Nothing,
+			selectedDate: _elm_lang$core$Maybe$Nothing,
+			previousSelectedDate: _elm_lang$core$Maybe$Nothing,
 			selectionMode: _user$project$DatePicker$Calendar,
 			monthChange: _user$project$DatePicker$Next,
 			yearList: {ctor: '[]'},
@@ -14426,9 +14457,10 @@ var _user$project$DatePicker$datePickerInit = function (id) {
 		_1: A2(_elm_lang$core$Task$perform, _user$project$DatePicker$GetToday, _elm_lang$core$Date$now)
 	};
 };
-var _user$project$DatePicker$DateSelected = function (a) {
-	return {ctor: 'DateSelected', _0: a};
-};
+var _user$project$DatePicker$DateSelected = F2(
+	function (a, b) {
+		return {ctor: 'DateSelected', _0: a, _1: b};
+	});
 var _user$project$DatePicker$daySectionMonth = F2(
 	function (model, props) {
 		return A2(
@@ -14440,20 +14472,20 @@ var _user$project$DatePicker$daySectionMonth = F2(
 			},
 			A2(
 				_elm_lang$core$List$map,
-				function (_p5) {
-					var _p6 = _p5;
-					var _p9 = _p6._0;
-					var _p8 = _p6._1;
-					var canSelect = props.canSelect(_p8);
+				function (_p8) {
+					var _p9 = _p8;
+					var _p12 = _p9._0;
+					var _p11 = _p9._1;
+					var canSelect = props.canSelect(_p11);
 					var isToday = _elm_lang$core$Native_Utils.eq(
 						_elm_lang$core$Date$toTime(model.today),
-						_elm_lang$core$Date$toTime(_p8));
+						_elm_lang$core$Date$toTime(_p11));
 					var isSelected = function () {
-						var _p7 = model.selectedDate;
-						if (_p7.ctor === 'Just') {
+						var _p10 = model.selectedDate;
+						if (_p10.ctor === 'Just') {
 							return _elm_lang$core$Native_Utils.eq(
-								_elm_lang$core$Date$toTime(_p7._0),
-								_elm_lang$core$Date$toTime(_p8));
+								_elm_lang$core$Date$toTime(_p10._0),
+								_elm_lang$core$Date$toTime(_p11));
 						} else {
 							return false;
 						}
@@ -14471,7 +14503,7 @@ var _user$project$DatePicker$daySectionMonth = F2(
 										_0: {
 											ctor: '_Tuple2',
 											_0: 'edp-empty-column',
-											_1: _elm_lang$core$Native_Utils.eq(_p9, 0)
+											_1: _elm_lang$core$Native_Utils.eq(_p12, 0)
 										},
 										_1: {
 											ctor: '::',
@@ -14515,8 +14547,10 @@ var _user$project$DatePicker$daySectionMonth = F2(
 								_1: {
 									ctor: '::',
 									_0: _elm_lang$html$Html_Events$onClick(
-										_user$project$DatePicker$DateSelected(
-											A2(_user$project$DatePicker$setDayOfMonth, model.indexDate, _p9))),
+										A2(
+											_user$project$DatePicker$DateSelected,
+											A2(_user$project$DatePicker$setDayOfMonth, model.indexDate, _p12),
+											A2(_elm_lang$core$Maybe$withDefault, model.indexDate, model.selectedDate))),
 									_1: {ctor: '[]'}
 								}
 							}
@@ -14524,7 +14558,7 @@ var _user$project$DatePicker$daySectionMonth = F2(
 						{
 							ctor: '::',
 							_0: _elm_lang$html$Html$text(
-								_elm_lang$core$Basics$toString(_p9)),
+								_elm_lang$core$Basics$toString(_p12)),
 							_1: {ctor: '[]'}
 						});
 				},
@@ -14541,8 +14575,8 @@ var _user$project$DatePicker$daySection = F2(
 				_1: {ctor: '[]'}
 			},
 			function () {
-				var _p10 = model.previousMonthMap;
-				if (_p10.ctor === 'Just') {
+				var _p13 = model.previousMonthMap;
+				if (_p13.ctor === 'Just') {
 					var monthString = _elm_lang$core$Basics$toString(
 						_elm_lang$core$Tuple$first(
 							_user$project$DatePicker_Util$getMonthInfo(
@@ -14586,7 +14620,7 @@ var _user$project$DatePicker$daySection = F2(
 										_user$project$DatePicker$daySectionMonth,
 										_elm_lang$core$Native_Utils.update(
 											model,
-											{currentMonthMap: _p10._0}),
+											{currentMonthMap: _p13._0}),
 										props),
 									_1: {ctor: '[]'}
 								})
@@ -14643,14 +14677,23 @@ var _user$project$DatePicker$daySection = F2(
 var _user$project$DatePicker$NoOp = {ctor: 'NoOp'};
 var _user$project$DatePicker$datePickerUpdate = F2(
 	function (msg, model) {
-		var _p11 = msg;
-		switch (_p11.ctor) {
+		var _p14 = msg;
+		switch (_p14.ctor) {
 			case 'NoOp':
 				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 			case 'DateSelected':
-				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							selectedDate: _elm_lang$core$Maybe$Just(_p14._0),
+							previousSelectedDate: _elm_lang$core$Maybe$Just(_p14._1)
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
 			case 'NextMonth':
-				var newModel = A2(_user$project$DatePicker$setIndexDate, model, _p11._0);
+				var newModel = A2(_user$project$DatePicker$setIndexDate, model, _p14._0);
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
@@ -14664,8 +14707,8 @@ var _user$project$DatePicker$datePickerUpdate = F2(
 					model,
 					A7(
 						_rluiten$elm_date_extra$Date_Extra_Create$dateFromFields,
-						_p11._1,
-						_elm_lang$core$Date$month(_p11._0),
+						_p14._1,
+						_elm_lang$core$Date$month(_p14._0),
 						1,
 						0,
 						0,
@@ -14679,7 +14722,7 @@ var _user$project$DatePicker$datePickerUpdate = F2(
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'PreviousMonth':
-				var newModel = A2(_user$project$DatePicker$setIndexDate, model, _p11._0);
+				var newModel = A2(_user$project$DatePicker$setIndexDate, model, _p14._0);
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
@@ -14688,8 +14731,8 @@ var _user$project$DatePicker$datePickerUpdate = F2(
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'GetToday':
-				var _p12 = _p11._0;
-				var updatedModel = A2(_user$project$DatePicker$setIndexDate, model, _p12);
+				var _p15 = _p14._0;
+				var updatedModel = A2(_user$project$DatePicker$setIndexDate, model, _p15);
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
@@ -14698,21 +14741,21 @@ var _user$project$DatePicker$datePickerUpdate = F2(
 							today: _elm_lang$core$Maybe$Just(
 								A2(
 									_user$project$DatePicker$setDayOfMonth,
-									_p12,
-									_elm_lang$core$Date$day(_p12)))
+									_p15,
+									_elm_lang$core$Date$day(_p15)))
 						}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'SetSelectionMode':
-				var _p14 = _p11._0;
+				var _p17 = _p14._0;
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{selectionMode: _p14, previousMonthMap: _elm_lang$core$Maybe$Nothing}),
+						{selectionMode: _p17, previousMonthMap: _elm_lang$core$Maybe$Nothing}),
 					_1: function () {
-						var _p13 = _p14;
-						if (_p13.ctor === 'Calendar') {
+						var _p16 = _p17;
+						if (_p16.ctor === 'Calendar') {
 							return _elm_lang$core$Platform_Cmd$none;
 						} else {
 							return A2(
@@ -14799,9 +14842,9 @@ var _user$project$DatePicker$bottomSection = F2(
 								ctor: '::',
 								_0: _elm_lang$html$Html_Events$onClick(
 									function () {
-										var _p15 = props.selectedDate;
-										if (_p15.ctor === 'Just') {
-											return _user$project$DatePicker$SubmitClicked(_p15._0);
+										var _p18 = props.selectedDate;
+										if (_p18.ctor === 'Just') {
+											return _user$project$DatePicker$SubmitClicked(_p18._0);
 										} else {
 											return _user$project$DatePicker$NoOp;
 										}
@@ -14833,7 +14876,7 @@ var _user$project$DatePicker$datePickerView = F2(
 			_elm_lang$core$Maybe$map3,
 			F3(
 				function (today, indexDate, currentMonthMap) {
-					var initializedModel = {id: model.id, today: today, indexDate: indexDate, selectedDate: props.selectedDate, colors: model.colors, currentMonthMap: currentMonthMap, previousMonthMap: model.previousMonthMap, monthChange: model.monthChange, yearList: model.yearList, selectionMode: model.selectionMode};
+					var initializedModel = {id: model.id, today: today, indexDate: indexDate, selectedDate: model.selectedDate, previousSelectedDate: model.previousSelectedDate, colors: model.colors, currentMonthMap: currentMonthMap, previousMonthMap: model.previousMonthMap, monthChange: model.monthChange, yearList: model.yearList, selectionMode: model.selectionMode};
 					return A2(
 						_elm_lang$html$Html$div,
 						{
@@ -14850,8 +14893,8 @@ var _user$project$DatePicker$datePickerView = F2(
 									_elm_lang$html$Html$div,
 									{ctor: '[]'},
 									function () {
-										var _p16 = model.selectionMode;
-										if (_p16.ctor === 'Calendar') {
+										var _p19 = model.selectionMode;
+										if (_p19.ctor === 'Calendar') {
 											return {
 												ctor: '::',
 												_0: A2(_user$project$DatePicker$monthChangeSection, initializedModel, props),
@@ -14888,9 +14931,9 @@ var _user$project$DatePicker$datePickerView = F2(
 			model.today,
 			model.indexDate,
 			model.currentMonthMap);
-		var _p17 = result;
-		if (_p17.ctor === 'Just') {
-			return _p17._0;
+		var _p20 = result;
+		if (_p20.ctor === 'Just') {
+			return _p20._0;
 		} else {
 			return A2(
 				_elm_lang$html$Html$div,
@@ -15023,7 +15066,7 @@ var _user$project$Demo$NoOp = {ctor: 'NoOp'};
 var Elm = {};
 Elm['Demo'] = Elm['Demo'] || {};
 if (typeof _user$project$Demo$main !== 'undefined') {
-    _user$project$Demo$main(Elm['Demo'], 'Demo', {"types":{"unions":{"Date.Date":{"args":[],"tags":{"Date":[]}},"Demo.Msg":{"args":[],"tags":{"OnDatePickerMsg":["DatePicker.DatePickerMsg"],"NoOp":[]}},"DatePicker.SelectionMode":{"args":[],"tags":{"Calendar":[],"YearPicker":[]}},"DatePicker.DatePickerMsg":{"args":[],"tags":{"NextMonth":["Date.Date"],"SubmitClicked":["Date.Date"],"DateSelected":["Date.Date"],"SetYear":["Date.Date","Int"],"NoOp":[],"SetSelectionMode":["DatePicker.SelectionMode"],"PreviousMonth":["Date.Date"],"CancelClicked":[],"GetToday":["Date.Date"]}}},"aliases":{},"message":"Demo.Msg"},"versions":{"elm":"0.18.0"}});
+    _user$project$Demo$main(Elm['Demo'], 'Demo', {"types":{"unions":{"Date.Date":{"args":[],"tags":{"Date":[]}},"Demo.Msg":{"args":[],"tags":{"OnDatePickerMsg":["DatePicker.DatePickerMsg"],"NoOp":[]}},"DatePicker.SelectionMode":{"args":[],"tags":{"Calendar":[],"YearPicker":[]}},"DatePicker.DatePickerMsg":{"args":[],"tags":{"NextMonth":["Date.Date"],"SubmitClicked":["Date.Date"],"DateSelected":["Date.Date","Date.Date"],"SetYear":["Date.Date","Int"],"NoOp":[],"SetSelectionMode":["DatePicker.SelectionMode"],"PreviousMonth":["Date.Date"],"CancelClicked":[],"GetToday":["Date.Date"]}}},"aliases":{},"message":"Demo.Msg"},"versions":{"elm":"0.18.0"}});
 }
 
 if (typeof define === "function" && define['amd'])

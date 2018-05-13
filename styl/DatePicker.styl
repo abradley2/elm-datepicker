@@ -17,17 +17,24 @@
             font-weight bolder
         cursor pointer
         font-size 14px
-    .edp-header-month-day
-        cursor pointer
-        padding-top 8px
-        font-size 32px
-        font-weight 500
+
 
 .edp-month-wrapper
     position relative
     width 300px
     height 240px
 
+@keyframes slideupprevious
+    from
+        transform translateY(0%)
+    to
+        transform translateY(-100%)
+
+@keyframes slideupnext
+    from
+        transform translateY(100%)
+    to
+        transform translateY(0%)
 
 @keyframes slidenext {
     from {
@@ -65,12 +72,36 @@
     }
 }
 
+.edp-month-day-wrapper
+    position relative
+    height 48px
+    overflow hidden
+
+.edp-header-month-day
+    padding-top 0px
+    position absolute
+    cursor pointer
+    font-size 32px
+    font-weight 500
+    height 48px
+    animation-duration .35s
+    animation-fill-mode forwards
+    line-height 48px
+    &.edp-month-day-previous
+        margin-right 1px
+        animation-name slideupprevious
+    &.edp-month-day-next
+        margin-right 1px
+        animation-name slideupnext
+
+
+
 .edp-month-slider
     top 0
     left 0
     width 300px
     position absolute
-    animation-duration .25s
+    animation-duration .35s
     animation-fill-mode forwards
     &.edp-in-next
         animation-name slidenext

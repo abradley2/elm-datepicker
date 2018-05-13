@@ -51,7 +51,7 @@ update msg model =
                 |>
                     (\( model, cmd ) ->
                         case datePickerMsg of
-                            DateSelected date ->
+                            DateSelected date previousDate ->
                                 ( { model | selectedDate = Just date }
                                 , cmd
                                 )

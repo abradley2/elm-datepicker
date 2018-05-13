@@ -65,7 +65,7 @@ it recognizes this type.
 -}
 type DatePickerMsg
     = NoOp
-    | DateSelected Date
+    | DateSelected Date Date
     | GetToday Date
     | SetYear Date Int
     | PreviousMonth Date
@@ -98,6 +98,8 @@ type alias DatePickerModel =
     , indexDate : Maybe Date
     , currentMonthMap : Maybe (List ( Int, Date ))
     , previousMonthMap : Maybe (List ( Int, Date ))
+    , selectedDate : Maybe Date
+    , previousSelectedDate : Maybe Date
     , colors : Dict.Dict String String
     , selectionMode : SelectionMode
     , monthChange : MonthChange
@@ -112,6 +114,7 @@ type alias InitializedModel =
     , currentMonthMap : List ( Int, Date )
     , previousMonthMap : Maybe (List ( Int, Date ))
     , selectedDate : Maybe Date
+    , previousSelectedDate : Maybe Date
     , colors : Dict.Dict String String
     , monthChange : MonthChange
     , yearList : List Int
@@ -195,6 +198,8 @@ datePickerInit id =
       , indexDate = Nothing
       , currentMonthMap = Nothing
       , previousMonthMap = Nothing
+      , selectedDate = Nothing
+      , previousSelectedDate = Nothing
       , selectionMode = Calendar
       , monthChange = Next
       , yearList = []
@@ -241,8 +246,13 @@ datePickerUpdate msg model =
         NoOp ->
             ( model, Cmd.none )
 
-        DateSelected date ->
-            ( model, Cmd.none )
+        DateSelected date previousDate ->
+            ( { model
+                | selectedDate = Just date
+                , previousSelectedDate = Just previousDate
+              }
+            , Cmd.none
+            )
 
         NextMonth newIndexDate ->
             let
@@ -318,63 +328,81 @@ type alias DatePickerProps =
     }
 
 
+getDayMonthText date =
+    let
+        ( monthFull, monthInt ) =
+            getMonthInfo <| Date.month date
+
+        ( dayShort, dayInt ) =
+            getDayInfo <| Date.dayOfWeek date
+    in
+        dayShort ++ ", " ++ (String.slice 0 3 monthFull) ++ " " ++ (toString <| Date.day date)
+
+
 headerSection : InitializedModel -> DatePickerProps -> Html DatePickerMsg
 headerSection model props =
-    case model.selectedDate of
-        Just selected ->
-            let
-                ( monthFull, monthInt ) =
-                    getMonthInfo <| Date.month selected
+    let
+        ( yearText, dayMonthText ) =
+            case model.selectedDate of
+                Just selected ->
+                    ( toString <| Date.year selected
+                    , getDayMonthText selected
+                    )
 
-                ( dayShort, dayInt ) =
-                    getDayInfo <| Date.dayOfWeek selected
-            in
-                div
-                    [ class "edp-header-section"
-                    , style [ ( "background-color", getColor model "primary" ) ]
+                Nothing ->
+                    ( toString <| Date.year model.indexDate, getDayMonthText model.indexDate )
+    in
+        div
+            [ class "edp-header-section"
+            , style [ ( "background-color", getColor model "primary" ) ]
+            ]
+            [ div
+                [ classList
+                    [ ( "edp-header-year", True )
+                    , ( "edp-header-active", Debug.log "year is active " <| model.selectionMode == YearPicker )
                     ]
-                    [ div
-                        [ classList
-                            [ ( "edp-header-year", True )
-                            , ( "edp-header-active", Debug.log "year is active " <| model.selectionMode == YearPicker )
-                            ]
-                        , onClick (SetSelectionMode YearPicker)
-                        ]
-                        [ text (toString <| Date.year selected) ]
-                    , div
+                , onClick (SetSelectionMode YearPicker)
+                ]
+                [ text yearText ]
+            , Keyed.node "div"
+                [ class "edp-month-day-wrapper"
+                ]
+                ([ ( dayMonthText
+                   , div
                         [ classList
                             [ ( "edp-header-month-day", True )
                             , ( "edp-header-active", model.selectionMode == Calendar )
+                            , ( "edp-month-day-next", True )
                             ]
                         , onClick (SetSelectionMode Calendar)
                         ]
-                        [ text (dayShort ++ ", " ++ (String.slice 0 3 monthFull) ++ " " ++ (toString <| Date.day selected))
+                        [ text dayMonthText
                         ]
-                    ]
+                   )
+                 ]
+                    -- if we have a previous date we need to render this in so we have an animation
+                    ++
+                        (case model.previousSelectedDate of
+                            Just previousDate ->
+                                [ ( getDayMonthText previousDate
+                                  , div
+                                        [ classList
+                                            [ ( "edp-header-month-day", True )
+                                            , ( "edp-header-active", model.selectionMode == Calendar )
+                                            , ( "edp-month-day-previous", True )
+                                            ]
+                                        , onClick (SetSelectionMode Calendar)
+                                        ]
+                                        [ text (getDayMonthText previousDate)
+                                        ]
+                                  )
+                                ]
 
-        Nothing ->
-            div
-                [ class "edp-header-section"
-                , style [ ( "background-color", getColor model "primary" ) ]
-                ]
-                [ div
-                    [ classList
-                        [ ( "edp-header-year", True )
-                        , ( "edp-header-active", Debug.log "year is active " <| model.selectionMode == YearPicker )
-                        ]
-                    , onClick (SetSelectionMode YearPicker)
-                    ]
-                    [ text (toString <| Date.year model.indexDate) ]
-                , div
-                    [ classList
-                        [ ( "edp-header-month-day", True )
-                        , ( "edp-header-active", model.selectionMode == Calendar )
-                        ]
-                    , onClick (SetSelectionMode Calendar)
-                    ]
-                    [ text "---"
-                    ]
-                ]
+                            Nothing ->
+                                [ ( "empty", div [] [] ) ]
+                        )
+                )
+            ]
 
 
 monthChangeSection : InitializedModel -> DatePickerProps -> Html DatePickerMsg
@@ -449,7 +477,7 @@ daySectionMonth model props =
                              else
                                 []
                             )
-                        , onClick (DateSelected (setDayOfMonth model.indexDate dayNum))
+                        , onClick (DateSelected (setDayOfMonth model.indexDate dayNum) (Maybe.withDefault model.indexDate model.selectedDate))
                         ]
                         [ text
                             (toString dayNum)
@@ -605,7 +633,8 @@ datePickerView model props =
                             { id = model.id
                             , today = today
                             , indexDate = indexDate
-                            , selectedDate = props.selectedDate
+                            , selectedDate = model.selectedDate
+                            , previousSelectedDate = model.previousSelectedDate
                             , colors = model.colors
                             , currentMonthMap = currentMonthMap
                             , previousMonthMap = model.previousMonthMap

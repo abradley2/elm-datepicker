@@ -18,23 +18,41 @@
 .edp-header-section .edp-header-year.edp-header-active {
   font-weight: bolder;
 }
-.edp-header-section .edp-header-month-day {
-  cursor: pointer;
-  padding-top: 8px;
-  font-size: 32px;
-  font-weight: 500;
-}
 .edp-month-wrapper {
   position: relative;
   width: 300px;
   height: 240px;
+}
+.edp-month-day-wrapper {
+  position: relative;
+  height: 48px;
+  overflow: hidden;
+}
+.edp-header-month-day {
+  padding-top: 0px;
+  position: absolute;
+  cursor: pointer;
+  font-size: 32px;
+  font-weight: 500;
+  height: 48px;
+  animation-duration: 0.35s;
+  animation-fill-mode: forwards;
+  line-height: 48px;
+}
+.edp-header-month-day.edp-month-day-previous {
+  margin-right: 1px;
+  animation-name: slideupprevious;
+}
+.edp-header-month-day.edp-month-day-next {
+  margin-right: 1px;
+  animation-name: slideupnext;
 }
 .edp-month-slider {
   top: 0;
   left: 0;
   width: 300px;
   position: absolute;
-  animation-duration: 0.25s;
+  animation-duration: 0.35s;
   animation-fill-mode: forwards;
 }
 .edp-month-slider.edp-in-next {
@@ -156,6 +174,70 @@
 }
 .edp-year-scroller-bottom {
   bottom: 5px;
+}
+@-moz-keyframes slideupprevious {
+  from {
+    transform: translateY(0%);
+  }
+  to {
+    transform: translateY(-100%);
+  }
+}
+@-webkit-keyframes slideupprevious {
+  from {
+    transform: translateY(0%);
+  }
+  to {
+    transform: translateY(-100%);
+  }
+}
+@-o-keyframes slideupprevious {
+  from {
+    transform: translateY(0%);
+  }
+  to {
+    transform: translateY(-100%);
+  }
+}
+@keyframes slideupprevious {
+  from {
+    transform: translateY(0%);
+  }
+  to {
+    transform: translateY(-100%);
+  }
+}
+@-moz-keyframes slideupnext {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0%);
+  }
+}
+@-webkit-keyframes slideupnext {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0%);
+  }
+}
+@-o-keyframes slideupnext {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0%);
+  }
+}
+@keyframes slideupnext {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0%);
+  }
 }
 @-moz-keyframes slidenext {
   from {
