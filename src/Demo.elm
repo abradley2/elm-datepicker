@@ -68,34 +68,25 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-    let
-        message =
-            (List.foldr
-                (\character word -> (word ++ character))
-                ""
-                [ "f", "o", "o" ]
-            )
-    in
-        div
+    div
+        [ style
+            [ ( "display", "flex" )
+            , ( "justify-content", "center" )
+            ]
+        ]
+        [ div
             [ style
-                [ ( "display", "flex" )
-                , ( "justify-content", "center" )
+                [ ( "margin-top", "40px" )
+                , ( "box-shadow", "0 1px 3px rgba(0, 0, 0, 0.24)" )
                 ]
             ]
-            [ h3 [] [ text message ]
-            , div
-                [ style
-                    [ ( "margin-top", "40px" )
-                    , ( "box-shadow", "0 1px 3px rgba(0, 0, 0, 0.24)" )
-                    ]
-                ]
-                [ datePickerView
-                    model.datePickerData
-                    { canSelect = (\date -> True)
-                    }
-                    |> Html.map OnDatePickerMsg
-                ]
+            [ datePickerView
+                model.datePickerData
+                { canSelect = (\date -> True)
+                }
+                |> Html.map OnDatePickerMsg
             ]
+        ]
 
 
 main : Program Never Model Msg
