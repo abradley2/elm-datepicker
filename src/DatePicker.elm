@@ -213,30 +213,32 @@ datePickerInit id =
 {-| datePickerUpdate consumes the message you've mapped and a `DatePickerModel` to output `( DatePickerModel, Cmd DatePickerMsg)`.
 You will need to alter your update function to handle `DatePickerMsg`'s that flow through and allow it to update accordingly.
 
-You will also want to respond to certain `DatePickerMsg`'s yourself, as certain properties like the "Selected Date" are not controlled
-within datePickerUpdate
     import DatePicker exposing (datePickerUpdate, DatePickerMsg(SelectDate))
 
-    handleDatePickerMsg datePickerMsg (datePickerData, datePickerCmd) ->
-        case datePickerMsg of
-            SubmitClicked selectedDate ->
-                ( { model |
-                  , selectedDate = Just selectedDate
-                  }
-                , Cmd.map HandleDatePickerMsg datePicker
-                )
-            _ ->
-                (model, Cmd.map HandleDatePickerMsg datePickerCmd)
-
-    update : Msg -> Model -> (Model, Cmd Msg)
-    update model msg =
+    update : Msg -> Model -> ( Model, Cmd Msg )
+    update msg model =
         case msg of
             NoOp ->
-                (model, Cmd.none)
-        case msg of
-            HandleDatePickerMsg datePickerMsg ->
+                ( model, Cmd.none )
+
+            OnDatePickerMsg datePickerMsg ->
                 datePickerUpdate datePickerMsg model.datePickerData
-                    |> handleDatePickerMsg datePickerMsg
+                    |> (\( data, cmd ) ->
+                        ( { model | datePickerData = data }
+                        , Cmd.map OnDatePickerMsg cmd
+                        )
+                    )
+                    -- and now we can respond to any internal messages we want
+                    |> (\( model, cmd ) ->
+                        case datePickerMsg of
+                            SubmitClicked currentSelectedDate ->
+                                ( { model | selectedDate = Just currentSelectedDate }
+                                , cmd
+                                )
+
+                            _ ->
+                                ( model, cmd )
+                    )
 -}
 datePickerUpdate : DatePickerMsg -> DatePickerModel -> ( DatePickerModel, Cmd DatePickerMsg )
 datePickerUpdate msg model =
@@ -317,8 +319,7 @@ datePickerUpdate msg model =
 
 
 {-| The second argument passed to datePickerView. These are configuration properties
-and other information that lives outside the DatePickerModel. It is important to respond
-to DateSelected in your update function to provide this `selectedDate`
+and other information that lives outside the DatePickerModel.
 -}
 type alias DatePickerProps =
     { canSelect : Date -> Bool

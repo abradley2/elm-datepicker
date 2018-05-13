@@ -32,7 +32,8 @@ type Msg
 Note that the `DateSelected` message gives two dates for it's arguments. The first is the selected date,
 the second is the date that was selected previously.
 
-**Init**
+**Init**  
+
 Initialize a date picker and add it to your model. Do not throw out the generated command.
 
 ```
@@ -76,35 +77,55 @@ getSelectedDate datePickerModel =
 
 You can also retrieve this from the `DateSelected` or `SubmitClicked` message
 
-**Update**
+**Update**  
 
 `datePickerUpdate` consumes the message you've mapped and a `DatePickerModel` to output `( DatePickerModel, Cmd DatePickerMsg)`.
 You will need to alter your update function to handle `DatePickerMsg`'s that flow through and allow it to update accordingly.
 ```
 import DatePicker exposing (datePickerUpdate, DatePickerMsg(SelectDate))
 
-handleDatePickerMsg datePickerMsg (datePickerData, datePickerCmd) ->
-   case datePickerMsg of
-       SubmitClicked selectedDate ->
-           ( { model |
-             , confirmedDate = Just selectedDate
-             }
-           , Cmd.map HandleDatePickerMsg datePickerCmd
-           )
-       _ ->
-           (model, Cmd.map HandleDatePickerMsg datePickerCmd)
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        NoOp ->
+            ( model, Cmd.none )
 
-update : Msg -> Model -> (Model, Cmd Msg)
-update model msg =
-   case msg of
-       NoOp ->
-           (model, Cmd.none)
-   case msg of
-       HandleDatePickerMsg datePickerMsg ->
-           datePickerUpdate datePickerMsg model.datePickerData
-               |> handleDatePickerMsg datePickerMsg
+        OnDatePickerMsg datePickerMsg ->
+            -- first let's allow the date picker to update itself
+            datePickerUpdate datePickerMsg model.datePickerData
+                |> (\( data, cmd ) ->
+                    ( { model | datePickerData = data }
+                    , Cmd.map OnDatePickerMsg cmd
+                    )
+                )
+                -- and now we can respond to any internal messages we want
+                |> (\( model, cmd ) ->
+                    case datePickerMsg of
+                        SubmitClicked currentSelectedDate ->
+                            ( { model | selectedDate = Just currentSelectedDate }
+                            , cmd
+                            )
+
+                        _ ->
+                            ( model, cmd )
+                )
 ```
 
+**View**  
+
+Now that we're all wired up we can render it in our view!
+```
+view : Model -> Html Msg
+view model =
+     div
+        []
+        [ datePickerView
+              model.datePickerData
+              { canSelect = (\date -> True)
+              }
+          |> Html.map OnDatePickerMsg
+        ]
+```
 
 ### Customization
 
