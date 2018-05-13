@@ -1,0 +1,184 @@
+@require './Variables.styl'
+
+
+.edp-container
+    display inline-block
+    font-family Roboto
+    width 300px
+    overflow hidden
+
+.edp-header-section
+    padding 16px 24px
+    color rgba(255, 255, 255, 0.8)
+    .edp-header-active
+        color white
+    .edp-header-year
+        &.edp-header-active
+            font-weight bolder
+        cursor pointer
+        font-size 14px
+    .edp-header-month-day
+        cursor pointer
+        padding-top 8px
+        font-size 32px
+        font-weight 500
+
+.edp-month-wrapper
+    position relative
+    width 300px
+    height 240px
+
+
+@keyframes slidenext {
+    from {
+        transform translateX(100%)
+    }
+    to {
+        transform translateX(0%)
+    }
+}
+
+@keyframes slideprevious {
+    from {
+        transform translateX(-100%)
+    }
+    to {
+        transform translateX(0%)
+    }
+}
+
+@keyframes slideoutnext {
+    from {
+        transform translateX(0%)
+    }
+    to {
+        transform translateX(-100%)
+    }
+}
+
+@keyframes slideoutprevious {
+    from {
+        transform translateX(0%)
+    }
+    to {
+        transform translateX(100%)
+    }
+}
+
+.edp-month-slider
+    top 0
+    left 0
+    width 300px
+    position absolute
+    animation-duration .25s
+    animation-fill-mode forwards
+    &.edp-in-next
+        animation-name slidenext
+    &.edp-in-previous
+        animation-name slideprevious
+    &.edp-out-next
+        animation-name slideoutnext
+    &.edp-out-previous
+        animation-name slideoutprevious
+
+.edp-month-change-section
+    display flex
+    color rgba(0, 0, 0, 0.86)
+    justify-content space-between
+    align-items center
+    .arrow-icon
+        padding 8px
+        cursor pointer
+        color rgba(0, 0, 0, 0.54)
+
+.edp-column
+    width 40px
+    height 40px
+    line-height 40px
+    text-align center
+    display inline-block
+
+.edp-day-symbol
+    font-size 12px
+    color rgba(0, 0, 0, 0.54)
+
+.edp-day-number
+    font-size 12px
+    color rgba(0, 0, 0, 0.86)
+    transition background-color .30s
+    border-radius 50%
+    background-color rgba(0, 0, 0, 0)
+    cursor pointer
+    &:hover:not(.edp-empty-column):not(.edp-disabled-column)
+        background-color rgba(0, 0, 0, 0.1)
+
+.edp-empty-column
+    color rgba(255, 255, 255, 0)
+
+.edp-disabled-column
+    color rgba(0, 0, 0, 0.54)
+
+.edp-body-section
+    background-color white
+    padding-left 8px
+    padding-right 8px
+    height 40px
+
+.edp-bottom-section
+    display flex
+    justify-content flex-end
+    padding-bottom 16px
+
+.edp-button
+    border none
+    outline none
+    background-color white
+    font-weight bold
+    min-width 64px
+    padding 8px
+    border-radius 3px
+    cursor pointer
+    background-color rgba(0, 0, 0, 0)
+    transition .30s
+    line-height 100%
+    &:not(:last-child)
+        margin-right 16px
+    &:hover:not(.edp-disabled)
+        background-color rgba(0, 0, 0, 0.1)
+    &:focus
+        outline none
+    &.edp-disabled
+        color rgba(0, 0, 0, 0.24)
+        cursor not-allowed
+
+.edp-year-button
+    color primary-color
+    padding 0px
+    width 200px
+    transition .3s
+    box-shadow 0 0px 0px rgba(0, 0, 0, 0.0)
+    &:hover
+        box-shadow  0 1px 3px rgba(0,0,0,0.24)
+
+.edp-year-picker
+    height 320px
+    position relative
+    display flex
+    justify-content center
+    overflow auto
+
+$scroller
+    position absolute
+    z-index 1
+    height 5px
+    left 0px
+    right 0px
+    background-color rgba(255, 255, 255, 0.5)
+
+.edp-year-scroller-top
+    @extends $scroller
+    top 0px
+
+.edp-year-scroller-bottom
+    @extends $scroller
+    bottom 5px

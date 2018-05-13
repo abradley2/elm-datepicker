@@ -1,0 +1,20 @@
+{
+  "name": "elm-datepicker",
+  "version": "1.0.0",
+  "description": "A datepicker for elm",
+  "main": "index.html",
+  "scripts": {
+    "start": "concurrently \"elm-live ./src/Demo.elm --pushstate --debug --output=demo.js --open\" \"stylus -w ./styl/DatePicker.styl -o ./\"",
+    "build-styles": "stylus ./style/DatePicker.styl -o ./",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Tony Bradley",
+  "license": "MIT",
+  "dependencies": {
+    "elm-live": "^2.7.5"
+  },
+  "devDependencies": {
+    "concurrently": "^3.5.1",
+    "stylus": "^0.54.5"
+  }
+}
