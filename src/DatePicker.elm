@@ -87,10 +87,9 @@ type DatePickerMsg
     init : Model
     ...
 
-This is mostly an opaque type you don't have to worry about. It may come of use to manually
-set the `indexDate` field, which is the date by which the picker decides which calendar month it
-is displaying. Notice the model has no knowledge of what the "Selected Date" is. This is expected
-to be controlled by the consuming application and passed in via the `DatePickerProps`
+This is mostly an opaque type you don't have to worry about, with the exception of the `selectedDate` field,
+which tells you what date the picker has currently selected- something you may not care about if you only want
+the date when you recieve the `SubmitClicked` message.
 -}
 type alias DatePickerModel =
     { id : String
@@ -220,10 +219,9 @@ within datePickerUpdate
 
     handleDatePickerMsg datePickerMsg (datePickerData, datePickerCmd) ->
         case datePickerMsg of
-            SelectedDate date ->
+            SubmitClicked selectedDate ->
                 ( { model |
-                  , selectedDate = Just date
-                  , datePickerData = datePickerData
+                  , selectedDate = Just selectedDate
                   }
                 , Cmd.map HandleDatePickerMsg datePicker
                 )
@@ -323,8 +321,7 @@ and other information that lives outside the DatePickerModel. It is important to
 to DateSelected in your update function to provide this `selectedDate`
 -}
 type alias DatePickerProps =
-    { selectedDate : Maybe Date
-    , canSelect : Date -> Bool
+    { canSelect : Date -> Bool
     }
 
 
@@ -539,7 +536,7 @@ bottomSection : InitializedModel -> DatePickerProps -> Html DatePickerMsg
 bottomSection model props =
     let
         disableOk =
-            props.selectedDate == Nothing
+            model.selectedDate == Nothing
 
         okButtonColor =
             if disableOk == False then
@@ -557,10 +554,10 @@ bottomSection model props =
             , button
                 [ classList
                     [ ( "edp-button", True )
-                    , ( "edp-disabled", props.selectedDate == Nothing )
+                    , ( "edp-disabled", model.selectedDate == Nothing )
                     ]
                 , onClick
-                    (case props.selectedDate of
+                    (case model.selectedDate of
                         Just date ->
                             SubmitClicked date
 

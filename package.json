@@ -5,6 +5,7 @@
   "main": "index.html",
   "scripts": {
     "start": "concurrently \"elm-live ./src/Demo.elm --pushstate --debug --output=demo.js --open\" \"stylus -w ./styl/DatePicker.styl -o ./\"",
+    "build": "npm run build-styles && elm-make ./src/Demo.elm --output ./demo.js",
     "build-styles": "stylus ./style/DatePicker.styl -o ./",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

@@ -14013,10 +14013,9 @@ var _user$project$DatePicker$InitializedModel = function (a) {
 		};
 	};
 };
-var _user$project$DatePicker$DatePickerProps = F2(
-	function (a, b) {
-		return {selectedDate: a, canSelect: b};
-	});
+var _user$project$DatePicker$DatePickerProps = function (a) {
+	return {canSelect: a};
+};
 var _user$project$DatePicker$YearPicker = {ctor: 'YearPicker'};
 var _user$project$DatePicker$Calendar = {ctor: 'Calendar'};
 var _user$project$DatePicker$Next = {ctor: 'Next'};
@@ -14778,7 +14777,7 @@ var _user$project$DatePicker$datePickerUpdate = F2(
 	});
 var _user$project$DatePicker$bottomSection = F2(
 	function (model, props) {
-		var disableOk = _elm_lang$core$Native_Utils.eq(props.selectedDate, _elm_lang$core$Maybe$Nothing);
+		var disableOk = _elm_lang$core$Native_Utils.eq(model.selectedDate, _elm_lang$core$Maybe$Nothing);
 		var okButtonColor = _elm_lang$core$Native_Utils.eq(disableOk, false) ? A2(_user$project$DatePicker$getColor, model, 'primary') : 'rgba(0, 0, 0, 0.24)';
 		return A2(
 			_elm_lang$html$Html$div,
@@ -14833,7 +14832,7 @@ var _user$project$DatePicker$bottomSection = F2(
 										_0: {
 											ctor: '_Tuple2',
 											_0: 'edp-disabled',
-											_1: _elm_lang$core$Native_Utils.eq(props.selectedDate, _elm_lang$core$Maybe$Nothing)
+											_1: _elm_lang$core$Native_Utils.eq(model.selectedDate, _elm_lang$core$Maybe$Nothing)
 										},
 										_1: {ctor: '[]'}
 									}
@@ -14842,7 +14841,7 @@ var _user$project$DatePicker$bottomSection = F2(
 								ctor: '::',
 								_0: _elm_lang$html$Html_Events$onClick(
 									function () {
-										var _p18 = props.selectedDate;
+										var _p18 = model.selectedDate;
 										if (_p18.ctor === 'Just') {
 											return _user$project$DatePicker$SubmitClicked(_p18._0);
 										} else {
@@ -14978,7 +14977,7 @@ var _user$project$Demo$update = F2(
 				var _p6 = _p3._0;
 				var _p5 = _p3._1;
 				var _p4 = _p9;
-				if (_p4.ctor === 'DateSelected') {
+				if (_p4.ctor === 'SubmitClicked') {
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
@@ -15006,6 +15005,26 @@ var _user$project$Demo$update = F2(
 		}
 	});
 var _user$project$Demo$view = function (model) {
+	var message = A3(
+		_elm_lang$core$List$foldr,
+		F2(
+			function (character, word) {
+				return A2(_elm_lang$core$Basics_ops['++'], word, character);
+			}),
+		'',
+		{
+			ctor: '::',
+			_0: 'f',
+			_1: {
+				ctor: '::',
+				_0: 'o',
+				_1: {
+					ctor: '::',
+					_0: 'o',
+					_1: {ctor: '[]'}
+				}
+			}
+		});
 	return A2(
 		_elm_lang$html$Html$div,
 		{
@@ -15025,38 +15044,48 @@ var _user$project$Demo$view = function (model) {
 		{
 			ctor: '::',
 			_0: A2(
-				_elm_lang$html$Html$div,
+				_elm_lang$html$Html$h3,
+				{ctor: '[]'},
 				{
 					ctor: '::',
-					_0: _elm_lang$html$Html_Attributes$style(
-						{
-							ctor: '::',
-							_0: {ctor: '_Tuple2', _0: 'margin-top', _1: '40px'},
-							_1: {
-								ctor: '::',
-								_0: {ctor: '_Tuple2', _0: 'box-shadow', _1: '0 1px 3px rgba(0, 0, 0, 0.24)'},
-								_1: {ctor: '[]'}
-							}
-						}),
-					_1: {ctor: '[]'}
-				},
-				{
-					ctor: '::',
-					_0: A2(
-						_elm_lang$html$Html$map,
-						_user$project$Demo$OnDatePickerMsg,
-						A2(
-							_user$project$DatePicker$datePickerView,
-							model.datePickerData,
-							{
-								selectedDate: model.selectedDate,
-								canSelect: function (_p10) {
-									return true;
-								}
-							})),
+					_0: _elm_lang$html$Html$text(message),
 					_1: {ctor: '[]'}
 				}),
-			_1: {ctor: '[]'}
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$div,
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html_Attributes$style(
+							{
+								ctor: '::',
+								_0: {ctor: '_Tuple2', _0: 'margin-top', _1: '40px'},
+								_1: {
+									ctor: '::',
+									_0: {ctor: '_Tuple2', _0: 'box-shadow', _1: '0 1px 3px rgba(0, 0, 0, 0.24)'},
+									_1: {ctor: '[]'}
+								}
+							}),
+						_1: {ctor: '[]'}
+					},
+					{
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$map,
+							_user$project$Demo$OnDatePickerMsg,
+							A2(
+								_user$project$DatePicker$datePickerView,
+								model.datePickerData,
+								{
+									canSelect: function (date) {
+										return true;
+									}
+								})),
+						_1: {ctor: '[]'}
+					}),
+				_1: {ctor: '[]'}
+			}
 		});
 };
 var _user$project$Demo$main = _elm_lang$html$Html$program(

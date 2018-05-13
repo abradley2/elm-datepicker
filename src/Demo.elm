@@ -51,8 +51,8 @@ update msg model =
                 |>
                     (\( model, cmd ) ->
                         case datePickerMsg of
-                            DateSelected date previousDate ->
-                                ( { model | selectedDate = Just date }
+                            SubmitClicked currentSelectedDate ->
+                                ( { model | selectedDate = Just currentSelectedDate }
                                 , cmd
                                 )
 
@@ -68,26 +68,34 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-    div
-        [ style
-            [ ( "display", "flex" )
-            , ( "justify-content", "center" )
-            ]
-        ]
-        [ div
+    let
+        message =
+            (List.foldr
+                (\character word -> (word ++ character))
+                ""
+                [ "f", "o", "o" ]
+            )
+    in
+        div
             [ style
-                [ ( "margin-top", "40px" )
-                , ( "box-shadow", "0 1px 3px rgba(0, 0, 0, 0.24)" )
+                [ ( "display", "flex" )
+                , ( "justify-content", "center" )
                 ]
             ]
-            [ datePickerView
-                model.datePickerData
-                { selectedDate = model.selectedDate
-                , canSelect = (\_ -> True)
-                }
-                |> Html.map OnDatePickerMsg
+            [ h3 [] [ text message ]
+            , div
+                [ style
+                    [ ( "margin-top", "40px" )
+                    , ( "box-shadow", "0 1px 3px rgba(0, 0, 0, 0.24)" )
+                    ]
+                ]
+                [ datePickerView
+                    model.datePickerData
+                    { canSelect = (\date -> True)
+                    }
+                    |> Html.map OnDatePickerMsg
+                ]
             ]
-        ]
 
 
 main : Program Never Model Msg
