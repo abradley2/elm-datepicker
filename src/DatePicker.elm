@@ -79,7 +79,7 @@ type DatePickerMsg
     import DatePicker exposing (DatePickerModel)
 
     type alias Model =
-        { username : String
+        { selectedDate : Maybe Date
         , datePickerData : DatePickerModel
         }
     }
@@ -185,7 +185,7 @@ setIndexDate model indexDate =
                 datePickerInit "my-datepicker-id"
         in
             ({ datePickerData = datePickerData
-             , ...
+             , selectedDate = Nothing
              }
              , Cmd.map SetDatePickerMsg datePickerInitCmd
             )
@@ -222,6 +222,7 @@ You will need to alter your update function to handle `DatePickerMsg`'s that flo
                 ( model, Cmd.none )
 
             OnDatePickerMsg datePickerMsg ->
+                -- first use datePickerUpdate to get updated datePickerData
                 datePickerUpdate datePickerMsg model.datePickerData
                     |> (\( data, cmd ) ->
                         ( { model | datePickerData = data }

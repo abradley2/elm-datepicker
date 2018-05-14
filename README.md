@@ -131,5 +131,5 @@ view model =
 
 ### Customization
 
-Navigate to the root of this directory, edit some variables in `style/Variables.styl` and
+Navigate to the root of this directory, edit some variables in `styl/Variables.styl` and
 run `npm install && npm run build-styles`. Then grab the css as you would before.
