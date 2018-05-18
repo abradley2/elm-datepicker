@@ -349,7 +349,7 @@ headerSection model props =
                     )
 
                 Nothing ->
-                    ( toString <| Date.year model.indexDate, getDayMonthText model.indexDate )
+                    ( toString <| Date.year model.indexDate, getDayMonthText model.today )
     in
         div
             [ class "edp-header-section"
@@ -469,7 +469,17 @@ daySectionMonth model props =
                             , ( "edp-day-number-selected", isSelected )
                             , ( "edp-day-number-today", isToday )
                             ]
-                        , onClick (DateSelected (setDayOfMonth model.indexDate dayNum) (Maybe.withDefault model.indexDate model.selectedDate))
+                        , onClick
+                            (case model.selectedDate of
+                                Just previousSelected ->
+                                    if Date.toTime previousSelected == Date.toTime date then
+                                        NoOp
+                                    else
+                                        DateSelected date previousSelected
+
+                                Nothing ->
+                                    DateSelected date model.today
+                            )
                         ]
                         [ text
                             (toString dayNum)
@@ -569,6 +579,9 @@ yearPickerSection model props =
 
             offset =
                 toString <| (List.length model.yearList) * 40 // 2 - 40
+
+            selectedYear =
+                Date.year <| Maybe.withDefault model.today model.selectedDate
           in
             div
                 [ classList
@@ -586,10 +599,7 @@ yearPickerSection model props =
                                 [ classList
                                     [ ( "edp-button", True )
                                     , ( "edp-year-button", True )
-                                    ]
-                                , style
-                                    [ ( "height", "40px" )
-                                    , ( "line-height", "40px" )
+                                    , ( "edp-year-button-selected", year == selectedYear )
                                     ]
                                 , onClick (SetYear model.indexDate year)
                                 ]

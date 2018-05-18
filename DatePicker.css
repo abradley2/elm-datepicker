@@ -159,9 +159,16 @@
   width: 200px;
   transition: 0.3s;
   box-shadow: 0 0px 0px rgba(0,0,0,0);
+  height: 40px;
+  line-height: 40px;
 }
 .edp-year-button:hover {
   box-shadow: 0 1px 3px rgba(0,0,0,0.24);
+}
+.edp-year-button.edp-year-button-selected {
+  height: 50px;
+  line-height: 50px;
+  font-size: 20px;
 }
 .edp-year-picker {
   height: 320px;
