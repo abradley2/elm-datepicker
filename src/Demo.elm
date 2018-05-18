@@ -5,7 +5,16 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Date exposing (..)
-import DatePicker exposing (DatePickerModel, DatePickerMsg, DatePickerMsg(..), datePickerInit, datePickerUpdate, datePickerView)
+import DatePicker
+    exposing
+        ( DatePickerModel
+        , DatePickerMsg
+        , DatePickerMsg(..)
+        , datePickerInit
+        , datePickerUpdate
+        , datePickerView
+        , datePickerDefaultProps
+        )
 
 
 type alias Model =
@@ -82,8 +91,7 @@ view model =
             ]
             [ datePickerView
                 model.datePickerData
-                { canSelect = (\date -> True)
-                }
+                datePickerDefaultProps
                 |> Html.map OnDatePickerMsg
             ]
         ]

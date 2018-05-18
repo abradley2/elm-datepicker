@@ -1,0 +1,62 @@
+[
+  {
+    "name": "DatePicker",
+    "comment": " This library fills a bunch of important niches in Elm. A `Maybe` can help\nyou with optional arguments, error handling, and records with optional fields.\n\n# Tea / Initialization\n@docs DatePickerMsg, datePickerInit, datePickerUpdate, DatePickerModel\n\n# Rendering and Settings\n@docs datePickerView, DatePickerProps, datePickerDefaultProps\n\n# Helpers\n@docs setIndexDate\n\n# Types\n@docs SelectionMode\n",
+    "aliases": [
+      {
+        "name": "DatePickerModel",
+        "comment": " The DatePickerModel type needs to be added to any data structure that requires a picker instance\n    import DatePicker exposing (DatePickerModel)\n\n    type alias Model =\n        { selectedDate : Maybe Date\n        , datePickerData : DatePickerModel\n        }\n    }\n\n    init : Model\n    ...\n\nThis is mostly an opaque type you don't have to worry about, though there are some important fields you will\nwant to use:\n\n* `today` is the default \"selected\" day of the picker before the user has actually clicked to \"select\" a day.\nThis is needed for the head display to not be empty when a user hasn't selected any date yet.\n* `indexDate` is a date used to track which month the calendar is currently showing. Do not set this directly. Use the `setIndexDate` helper\n* `selectedDate` is the last date the user clicked on in the calendar that was selectable\n* `selectionMode` determines whether the user sees the `Calendar` or the `YearPicker`\n",
+        "args": [],
+        "type": "{ id : String , today : Maybe.Maybe Date.Date , indexDate : Maybe.Maybe Date.Date , currentMonthMap : Maybe.Maybe (List ( Int, Date.Date )) , previousMonthMap : Maybe.Maybe (List ( Int, Date.Date )) , selectedDate : Maybe.Maybe Date.Date , previousSelectedDate : Maybe.Maybe Date.Date , selectionMode : DatePicker.SelectionMode , monthChange : DatePicker.MonthChange , yearList : List Int }"
+      },
+      {
+        "name": "DatePickerProps",
+        "comment": " The second argument passed to datePickerView. These are configuration properties\nthat generally determine the range of selectable dates\n",
+        "args": [],
+        "type": "{ canSelectYear : Int -> Bool , canSelectMonth : Int -> Date.Month -> Bool , canSelectDate : Date.Date -> Bool }"
+      }
+    ],
+    "types": [
+      {
+        "name": "DatePickerMsg",
+        "comment": " You will first need to add the `DatePickerMsg` to the type consumed by your `update` function so\nit recognizes this type.\n\n    import DatePicker exposing (DatePickerMsg, DatePickerMsg(..))\n    ...\n    type Msg\n        = FireZeMissiles\n        |  DatePickerMsg\n",
+        "args": [],
+        "cases": []
+      },
+      {
+        "name": "SelectionMode",
+        "comment": " Represents the current mode the picker is set to\n\n    type SelectionMode\n        = Calendar\n        | YearPicker\n",
+        "args": [],
+        "cases": []
+      }
+    ],
+    "values": [
+      {
+        "name": "datePickerDefaultProps",
+        "comment": " Use the default props if you don't want to support any sort of configuration.\nThese mostly center around limiting the user to a specific selection range of dates.\nBy default, nothing is restricted.\n\n    datePickerDefaultProps =\n        { canSelectYear = \\year -> True\n        , canSelectMonth = \\year month -> True\n        , canSelectDate = \\date -> True\n        }\n",
+        "type": "DatePicker.DatePickerProps"
+      },
+      {
+        "name": "datePickerInit",
+        "comment": " datePickerInit returns an initialized DatePickerModel and a `Cmd` to initialize the picker\n\n    import DatePicker exposing (datePickerInit)\n\n    init : (Model, Cmd Msg)\n    init =\n        let\n            (datePickerData, datePickerInitCmd) =\n                datePickerInit \"my-datepicker-id\"\n        in\n            ({ datePickerData = datePickerData\n             , selectedDate = Nothing\n             }\n             , Cmd.map HandleDatePickerMsg datePickerInitCmd\n            )\n",
+        "type": "String -> ( DatePicker.DatePickerModel , Platform.Cmd.Cmd DatePicker.DatePickerMsg )"
+      },
+      {
+        "name": "datePickerUpdate",
+        "comment": " datePickerUpdate consumes the message you've mapped and a `DatePickerModel` to output `( DatePickerModel, Cmd DatePickerMsg)`.\nYou will need to alter your update function to handle any `DatePickerMsg` that flows through.\n\n\n    import DatePicker exposing\n        ( datePickerUpdate\n        , DatePickerMsg(SelectDate)\n        )\n    ...\n    handleDatePickerMsg model datePickerMsg =\n        let\n            (datePickerData, datePickerCmd) =\n                datePickerUpdate datePickerMsg model.datePickerData\n        in\n            ({ model\n             | datePickerData = datePickerData\n             }\n            , Cmd.map HandleDatePickerMsg datePickerCmd\n            )\n    ...\n    update : Msg -> Model -> ( Model, Cmd Msg )\n    update msg model =\n        case msg of\n            NoOp ->\n                ( model, Cmd.none )\n\n            HandleDatePickerMsg datePickerMsg ->\n                handleDatePickerMsg model datePickerMsg\n",
+        "type": "DatePicker.DatePickerMsg -> DatePicker.DatePickerModel -> ( DatePicker.DatePickerModel , Platform.Cmd.Cmd DatePicker.DatePickerMsg )"
+      },
+      {
+        "name": "datePickerView",
+        "comment": "\nThe main view for the datepicker. Use `Html.map` so the returned type doesn't conflict with\nyour view's type.\n\n    view : Model -> Html Msg\n    view model =\n        datePickerView\n            model.datePickerData\n            datePickerDefaultProps\n            |> Html.map OnDatePickerMsg\n",
+        "type": "DatePicker.DatePickerModel -> DatePicker.DatePickerProps -> Html.Html DatePicker.DatePickerMsg"
+      },
+      {
+        "name": "setIndexDate",
+        "comment": " Takes an instance of DatePickerModel and returns a new one with the given date. It is\nimportant to not just set indexDate directly as this will not refresh the data to completely\nreflect this\n",
+        "type": "DatePicker.DatePickerModel -> Date.Date -> DatePicker.DatePickerModel"
+      }
+    ],
+    "generated-with-elm-version": "0.18.0"
+  }
+]

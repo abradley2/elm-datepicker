@@ -13916,6 +13916,18 @@ var _user$project$DatePicker$getDayMonthText = function (date) {
 					_elm_lang$core$Basics$toString(
 						_elm_lang$core$Date$day(date))))));
 };
+var _user$project$DatePicker$datePickerDefaultProps = {
+	canSelectYear: function (year) {
+		return true;
+	},
+	canSelectMonth: F2(
+		function (year, month) {
+			return true;
+		}),
+	canSelectDate: function (date) {
+		return true;
+	}
+};
 var _user$project$DatePicker$setDayOfMonth = F2(
 	function (date, num) {
 		return A7(
@@ -13960,13 +13972,6 @@ var _user$project$DatePicker$setIndexDate = F2(
 				yearList: yearList
 			});
 	});
-var _user$project$DatePicker$getColor = F2(
-	function (model, color) {
-		return A2(
-			_elm_lang$core$Maybe$withDefault,
-			'red',
-			A2(_elm_lang$core$Dict$get, color, model.colors));
-	});
 var _user$project$DatePicker$DatePickerModel = function (a) {
 	return function (b) {
 		return function (c) {
@@ -13977,9 +13982,7 @@ var _user$project$DatePicker$DatePickerModel = function (a) {
 							return function (h) {
 								return function (i) {
 									return function (j) {
-										return function (k) {
-											return {id: a, today: b, indexDate: c, currentMonthMap: d, previousMonthMap: e, selectedDate: f, previousSelectedDate: g, colors: h, selectionMode: i, monthChange: j, yearList: k};
-										};
+										return {id: a, today: b, indexDate: c, currentMonthMap: d, previousMonthMap: e, selectedDate: f, previousSelectedDate: g, selectionMode: h, monthChange: i, yearList: j};
 									};
 								};
 							};
@@ -14000,9 +14003,7 @@ var _user$project$DatePicker$InitializedModel = function (a) {
 							return function (h) {
 								return function (i) {
 									return function (j) {
-										return function (k) {
-											return {id: a, today: b, indexDate: c, currentMonthMap: d, previousMonthMap: e, selectedDate: f, previousSelectedDate: g, colors: h, monthChange: i, yearList: j, selectionMode: k};
-										};
+										return {id: a, today: b, indexDate: c, currentMonthMap: d, previousMonthMap: e, selectedDate: f, previousSelectedDate: g, monthChange: h, yearList: i, selectionMode: j};
 									};
 								};
 							};
@@ -14013,9 +14014,10 @@ var _user$project$DatePicker$InitializedModel = function (a) {
 		};
 	};
 };
-var _user$project$DatePicker$DatePickerProps = function (a) {
-	return {canSelect: a};
-};
+var _user$project$DatePicker$DatePickerProps = F3(
+	function (a, b, c) {
+		return {canSelectYear: a, canSelectMonth: b, canSelectDate: c};
+	});
 var _user$project$DatePicker$YearPicker = {ctor: 'YearPicker'};
 var _user$project$DatePicker$Calendar = {ctor: 'Calendar'};
 var _user$project$DatePicker$Next = {ctor: 'Next'};
@@ -14434,8 +14436,7 @@ var _user$project$DatePicker$datePickerInit = function (id) {
 			previousSelectedDate: _elm_lang$core$Maybe$Nothing,
 			selectionMode: _user$project$DatePicker$Calendar,
 			monthChange: _user$project$DatePicker$Next,
-			yearList: {ctor: '[]'},
-			colors: A3(_elm_lang$core$Dict$insert, 'primary', '#5a9789', _elm_lang$core$Dict$empty)
+			yearList: {ctor: '[]'}
 		},
 		_1: A2(_elm_lang$core$Task$perform, _user$project$DatePicker$GetToday, _elm_lang$core$Date$now)
 	};
@@ -14561,7 +14562,7 @@ var _user$project$DatePicker$daySectionMonth = F2(
 					var _p13 = _p12;
 					var _p18 = _p13._0;
 					var _p17 = _p13._1;
-					var canSelect = props.canSelect(_p17);
+					var canSelect = props.canSelectDate(_p17);
 					var isToday = _elm_lang$core$Native_Utils.eq(
 						_elm_lang$core$Date$toTime(model.today),
 						_elm_lang$core$Date$toTime(_p17));
@@ -14839,7 +14840,7 @@ var _user$project$DatePicker$datePickerView = F2(
 			_elm_lang$core$Maybe$map3,
 			F3(
 				function (today, indexDate, currentMonthMap) {
-					var initializedModel = {id: model.id, today: today, indexDate: indexDate, selectedDate: model.selectedDate, previousSelectedDate: model.previousSelectedDate, colors: model.colors, currentMonthMap: currentMonthMap, previousMonthMap: model.previousMonthMap, monthChange: model.monthChange, yearList: model.yearList, selectionMode: model.selectionMode};
+					var initializedModel = {id: model.id, today: today, indexDate: indexDate, selectedDate: model.selectedDate, previousSelectedDate: model.previousSelectedDate, currentMonthMap: currentMonthMap, previousMonthMap: model.previousMonthMap, monthChange: model.monthChange, yearList: model.yearList, selectionMode: model.selectionMode};
 					return A2(
 						_elm_lang$html$Html$div,
 						{
@@ -15008,14 +15009,7 @@ var _user$project$Demo$view = function (model) {
 					_0: A2(
 						_elm_lang$html$Html$map,
 						_user$project$Demo$OnDatePickerMsg,
-						A2(
-							_user$project$DatePicker$datePickerView,
-							model.datePickerData,
-							{
-								canSelect: function (date) {
-									return true;
-								}
-							})),
+						A2(_user$project$DatePicker$datePickerView, model.datePickerData, _user$project$DatePicker$datePickerDefaultProps)),
 					_1: {ctor: '[]'}
 				}),
 			_1: {ctor: '[]'}

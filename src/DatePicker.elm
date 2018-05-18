@@ -3,13 +3,13 @@ module DatePicker
         ( datePickerView
         , datePickerInit
         , setIndexDate
+        , datePickerDefaultProps
         , datePickerUpdate
         , SelectionMode
         , DatePickerProps
         , DatePickerModel
         , DatePickerMsg
         , DatePickerMsg(..)
-        , setDayOfMonth
         )
 
 {-| This library fills a bunch of important niches in Elm. A `Maybe` can help
@@ -19,10 +19,10 @@ you with optional arguments, error handling, and records with optional fields.
 @docs DatePickerMsg, datePickerInit, datePickerUpdate, DatePickerModel
 
 # Rendering and Settings
-@docs datePickerView, DatePickerProps
+@docs datePickerView, DatePickerProps, datePickerDefaultProps
 
 # Helpers
-@docs setIndexDate, setDayOfMonth
+@docs setIndexDate
 
 # Types
 @docs SelectionMode
@@ -44,6 +44,10 @@ import DatePicker.Util exposing (..)
 
 
 {-| Represents the current mode the picker is set to
+
+    type SelectionMode
+        = Calendar
+        | YearPicker
 -}
 type SelectionMode
     = Calendar
@@ -57,11 +61,12 @@ type MonthChange
 
 {-| You will first need to add the `DatePickerMsg` to the type consumed by your `update` function so
 it recognizes this type.
-    import DatePicker exposing (DatePickerMsg, DatePickerMsg(..))
 
+    import DatePicker exposing (DatePickerMsg, DatePickerMsg(..))
+    ...
     type Msg
         = FireZeMissiles
-        | HandleDatePickerMsg DatePickerMsg
+        |  DatePickerMsg
 -}
 type DatePickerMsg
     = NoOp
@@ -79,17 +84,21 @@ type DatePickerMsg
     import DatePicker exposing (DatePickerModel)
 
     type alias Model =
-        { selectedDate : Maybe Date
-        , datePickerData : DatePickerModel
+        { datePickerData : DatePickerModel
         }
     }
 
     init : Model
     ...
 
-This is mostly an opaque type you don't have to worry about, with the exception of the `selectedDate` field,
-which tells you what date the picker has currently selected- something you may not care about if you only want
-the date when you recieve the `SubmitClicked` message.
+This is mostly an opaque type you don't have to worry about, though there are some important fields you will
+want to use:
+
+* `today` is the default "selected" day of the picker before the user has actually clicked to "select" a day.
+This is needed for the head display to not be empty when a user hasn't selected any date yet.
+* `indexDate` is a date used to track which month the calendar is currently showing. Do not set this directly. Use the `setIndexDate` helper
+* `selectedDate` is the last date the user clicked on in the calendar that was selectable
+* `selectionMode` determines whether the user sees the `Calendar` or the `YearPicker`
 -}
 type alias DatePickerModel =
     { id : String
@@ -99,7 +108,6 @@ type alias DatePickerModel =
     , previousMonthMap : Maybe (List ( Int, Date ))
     , selectedDate : Maybe Date
     , previousSelectedDate : Maybe Date
-    , colors : Dict.Dict String String
     , selectionMode : SelectionMode
     , monthChange : MonthChange
     , yearList : List Int
@@ -114,20 +122,12 @@ type alias InitializedModel =
     , previousMonthMap : Maybe (List ( Int, Date ))
     , selectedDate : Maybe Date
     , previousSelectedDate : Maybe Date
-    , colors : Dict.Dict String String
     , monthChange : MonthChange
     , yearList : List Int
     , selectionMode : SelectionMode
     }
 
 
-getColor : InitializedModel -> String -> String
-getColor model color =
-    Maybe.withDefault "red" (Dict.get color model.colors)
-
-
-{-| Given a date and a number reflecting the day of that month, returns a new date with the day to to that input
--}
 setDayOfMonth : Date -> Int -> Date
 setDayOfMonth date num =
     dateFromFields
@@ -187,7 +187,7 @@ setIndexDate model indexDate =
             ({ datePickerData = datePickerData
              , selectedDate = Nothing
              }
-             , Cmd.map SetDatePickerMsg datePickerInitCmd
+            , Cmd.map HandleDatePickerMsg datePickerInitCmd
             )
 -}
 datePickerInit : String -> ( DatePickerModel, Cmd DatePickerMsg )
@@ -202,44 +202,39 @@ datePickerInit id =
       , selectionMode = Calendar
       , monthChange = Next
       , yearList = []
-      , colors =
-            Dict.empty
-                |> Dict.insert "primary" "#5a9789"
       }
     , Task.perform GetToday Date.now
     )
 
 
 {-| datePickerUpdate consumes the message you've mapped and a `DatePickerModel` to output `( DatePickerModel, Cmd DatePickerMsg)`.
-You will need to alter your update function to handle `DatePickerMsg`'s that flow through and allow it to update accordingly.
+You will need to alter your update function to handle any `DatePickerMsg` that flows through.
 
-    import DatePicker exposing (datePickerUpdate, DatePickerMsg(SelectDate))
 
+    import DatePicker exposing
+        ( datePickerUpdate
+        , DatePickerMsg(SelectDate)
+        )
+    ...
+    handleDatePickerMsg model datePickerMsg =
+        let
+            (datePickerData, datePickerCmd) =
+                datePickerUpdate datePickerMsg model.datePickerData
+        in
+            ({ model
+             | datePickerData = datePickerData
+             }
+            , Cmd.map HandleDatePickerMsg datePickerCmd
+            )
+    ...
     update : Msg -> Model -> ( Model, Cmd Msg )
     update msg model =
         case msg of
             NoOp ->
                 ( model, Cmd.none )
 
-            OnDatePickerMsg datePickerMsg ->
-                -- first use datePickerUpdate to get updated datePickerData
-                datePickerUpdate datePickerMsg model.datePickerData
-                    |> (\( data, cmd ) ->
-                        ( { model | datePickerData = data }
-                        , Cmd.map OnDatePickerMsg cmd
-                        )
-                    )
-                    -- and now we can respond to any internal messages we want
-                    |> (\( model, cmd ) ->
-                        case datePickerMsg of
-                            SubmitClicked currentSelectedDate ->
-                                ( { model | selectedDate = Just currentSelectedDate }
-                                , cmd
-                                )
-
-                            _ ->
-                                ( model, cmd )
-                    )
+            HandleDatePickerMsg datePickerMsg ->
+                handleDatePickerMsg model datePickerMsg
 -}
 datePickerUpdate : DatePickerMsg -> DatePickerModel -> ( DatePickerModel, Cmd DatePickerMsg )
 datePickerUpdate msg model =
@@ -320,10 +315,30 @@ datePickerUpdate msg model =
 
 
 {-| The second argument passed to datePickerView. These are configuration properties
-and other information that lives outside the DatePickerModel.
+that generally determine the range of selectable dates
 -}
 type alias DatePickerProps =
-    { canSelect : Date -> Bool
+    { canSelectYear : Int -> Bool
+    , canSelectMonth : Int -> Month -> Bool
+    , canSelectDate : Date -> Bool
+    }
+
+
+{-| Use the default props if you don't want to support any sort of configuration.
+These mostly center around limiting the user to a specific selection range of dates.
+By default, nothing is restricted.
+
+    datePickerDefaultProps =
+        { canSelectYear = \year -> True
+        , canSelectMonth = \year month -> True
+        , canSelectDate = \date -> True
+        }
+-}
+datePickerDefaultProps : DatePickerProps
+datePickerDefaultProps =
+    { canSelectYear = \year -> True
+    , canSelectMonth = \year month -> True
+    , canSelectDate = \date -> True
     }
 
 
@@ -459,7 +474,7 @@ daySectionMonth model props =
                         Date.toTime model.today == Date.toTime date
 
                     canSelect =
-                        props.canSelect date
+                        props.canSelectDate date
                 in
                     div
                         [ classList
@@ -612,7 +627,15 @@ yearPickerSection model props =
 
 
 {-|
-The main view for the datepicker
+The main view for the datepicker. Use `Html.map` so the returned type doesn't conflict with
+your view's type.
+
+    view : Model -> Html Msg
+    view model =
+        datePickerView
+            model.datePickerData
+            datePickerDefaultProps
+            |> Html.map OnDatePickerMsg
 -}
 datePickerView : DatePickerModel -> DatePickerProps -> Html DatePickerMsg
 datePickerView model props =
@@ -627,7 +650,6 @@ datePickerView model props =
                             , indexDate = indexDate
                             , selectedDate = model.selectedDate
                             , previousSelectedDate = model.previousSelectedDate
-                            , colors = model.colors
                             , currentMonthMap = currentMonthMap
                             , previousMonthMap = model.previousMonthMap
                             , monthChange = model.monthChange
