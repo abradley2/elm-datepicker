@@ -5,6 +5,7 @@
   overflow: hidden;
 }
 .edp-header-section {
+  background-color: #5a9789;
   padding: 16px 24px;
   color: rgba(255,255,255,0.8);
 }
@@ -97,8 +98,16 @@
   background-color: rgba(0,0,0,0);
   cursor: pointer;
 }
-.edp-day-number:hover:not(.edp-empty-column):not(.edp-disabled-column) {
+.edp-day-number:hover:not(.edp-empty-column):not(.edp-disabled-column):not(.edp-day-number-selected) {
   background-color: rgba(0,0,0,0.1);
+}
+.edp-day-number.edp-day-number-today {
+  color: #5a9789;
+  font-weight: bolder;
+}
+.edp-day-number.edp-day-number-selected {
+  background-color: #5a9789;
+  color: #fff;
 }
 .edp-empty-column {
   color: rgba(255,255,255,0);
@@ -118,6 +127,7 @@
   padding-bottom: 16px;
 }
 .edp-button {
+  color: #5a9789;
   border: none;
   outline: none;
   background-color: #fff;

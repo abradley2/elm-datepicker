@@ -353,7 +353,6 @@ headerSection model props =
     in
         div
             [ class "edp-header-section"
-            , style [ ( "background-color", getColor model "primary" ) ]
             ]
             [ div
                 [ classList
@@ -467,15 +466,9 @@ daySectionMonth model props =
                             [ ( "edp-column edp-day-number", True )
                             , ( "edp-empty-column", dayNum == 0 )
                             , ( "edp-disabled-column", canSelect == False )
+                            , ( "edp-day-number-selected", isSelected )
+                            , ( "edp-day-number-today", isToday )
                             ]
-                        , style
-                            (if isSelected then
-                                [ ( "background-color", getColor model "primary" ), ( "color", "white" ) ]
-                             else if isToday then
-                                [ ( "color", getColor model "primary" ), ( "font-weight", "bold" ) ]
-                             else
-                                []
-                            )
                         , onClick (DateSelected (setDayOfMonth model.indexDate dayNum) (Maybe.withDefault model.indexDate model.selectedDate))
                         ]
                         [ text
@@ -511,13 +504,11 @@ daySection model props =
                       )
                     , ( monthString
                       , div
-                            [ class
-                                ("edp-month-slider "
-                                    ++ if model.monthChange == Next then
-                                        "edp-in-next"
-                                       else
-                                        "edp-in-previous"
-                                )
+                            [ classList
+                                [ ( "edp-month-slider", True )
+                                , ( "edp-in-next", model.monthChange == Next )
+                                , ( "edp-in-previous", model.monthChange /= Next )
+                                ]
                             ]
                             [ daySectionMonth model props
                             ]
@@ -539,18 +530,11 @@ bottomSection model props =
     let
         disableOk =
             model.selectedDate == Nothing
-
-        okButtonColor =
-            if disableOk == False then
-                (getColor model "primary")
-            else
-                "rgba(0, 0, 0, 0.24)"
     in
         div [ class "edp-body-section edp-bottom-section" ]
             [ button
                 [ onClick CancelClicked
                 , class "edp-button"
-                , style [ ( "color", getColor model "primary" ) ]
                 ]
                 [ text "CANCEL" ]
             , button
@@ -566,7 +550,6 @@ bottomSection model props =
                         Nothing ->
                             NoOp
                     )
-                , style [ ( "color", okButtonColor ) ]
                 ]
                 [ text "OK" ]
             ]
