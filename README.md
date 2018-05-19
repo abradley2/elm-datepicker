@@ -6,6 +6,6 @@ A Material Design Date Picker for the lovely Elm language.
 
 ![pretty image](https://i.imgur.com/3o2WoMc.png)
 
-### Documentation
+## Documentation
 
-Check out elm-package for the docs!
+[Check out elm-package for the docs!](http://package.elm-lang.org/packages/abradley2/elm-datepicker/latest/DatePicker)
