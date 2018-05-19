@@ -1,7 +1,7 @@
 [
   {
     "name": "DatePicker",
-    "comment": " This module provides a material-style date picker for Elm. Since this date picker\nuses material-icons, you will need to have these included on your page.\nAlso include the `DatePicker.css` found in the root of this directory.\n\n\n    <link href=\"https://fonts.googleapis.com/icon?family=Material+Icons\" rel=\"stylesheet\">\n    <link rel=\"stylesheet\" type=\"text/css\" href=\"DatePicker.css\" />\n\n\nTo alter the color theme edit `./styl/Variables.styl`, then run\n`npm install && npm run build-styles`.\n\n\n# Tea / Initialization\n@docs DatePickerMsg, datePickerInit, datePickerUpdate, DatePickerModel\n\n# Rendering and Settings\n@docs datePickerView, DatePickerProps, datePickerDefaultProps\n\n# Helpers\n@docs setIndexDate\n\n# Types\n@docs SelectionMode\n",
+    "comment": " This module provides a material-style date picker for Elm.\n[You can out the demo here.](http://abradley2.github.io/elm-datepicker/)\nSince this date picker\nuses material-icons, you will need to have these included on your page.\nAlso include the `DatePicker.css` found in the root of this directory.\n\n\n    <link href=\"https://fonts.googleapis.com/icon?family=Material+Icons\" rel=\"stylesheet\">\n    <link rel=\"stylesheet\" type=\"text/css\" href=\"DatePicker.css\" />\n\n\nTo alter the color theme edit `./styl/Variables.styl`, then run\n`npm install && npm run build-styles`.\n\n\n# Tea / Initialization\n@docs DatePickerMsg, datePickerInit, datePickerUpdate, DatePickerModel\n\n# Rendering and Settings\n@docs datePickerView, DatePickerProps, datePickerDefaultProps\n\n# Helpers\n@docs setIndexDate\n\n# Types\n@docs SelectionMode\n",
     "aliases": [
       {
         "name": "DatePickerModel",
