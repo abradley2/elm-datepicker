@@ -12,8 +12,18 @@ module DatePicker
         , DatePickerMsg(..)
         )
 
-{-| This library fills a bunch of important niches in Elm. A `Maybe` can help
-you with optional arguments, error handling, and records with optional fields.
+{-| This module provides a material-style date picker for Elm. Since this date picker
+uses material-icons, you will need to have these included on your page.
+Also include the `DatePicker.css` found in the root of this directory.
+
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="DatePicker.css" />
+
+
+To alter the color theme edit `./styl/Variables.styl`, then run
+`npm install && npm run build-styles`.
+
 
 # Tea / Initialization
 @docs DatePickerMsg, datePickerInit, datePickerUpdate, DatePickerModel
@@ -81,21 +91,20 @@ type DatePickerMsg
 
 
 {-| The DatePickerModel type needs to be added to any data structure that requires a picker instance
-    import DatePicker exposing (DatePickerModel)
 
+    import DatePicker exposing (DatePickerModel)
+    ...
     type alias Model =
         { datePickerData : DatePickerModel
         }
     }
 
-    init : Model
-    ...
 
 This is mostly an opaque type you don't have to worry about, though there are some important fields you will
 want to use:
 
 * `today` is the default "selected" day of the picker before the user has actually clicked to "select" a day.
-This is needed for the head display to not be empty when a user hasn't selected any date yet.
+This is needed so the head display isn't empty before the user has selected anything, without forcing there be a default selected date of "today".
 * `indexDate` is a date used to track which month the calendar is currently showing. Do not set this directly. Use the `setIndexDate` helper
 * `selectedDate` is the last date the user clicked on in the calendar that was selectable
 * `selectionMode` determines whether the user sees the `Calendar` or the `YearPicker`
@@ -140,7 +149,7 @@ setDayOfMonth date num =
         0
 
 
-{-| Takes an instance of DatePickerModel and returns a new one with the given date. It is
+{-| Takes an instance of DatePickerModel and returns a new one with the given index date. It is
 important to not just set indexDate directly as this will not refresh the data to completely
 reflect this
 -}
@@ -159,10 +168,7 @@ setIndexDate model indexDate =
                 indexDate
 
         yearList =
-            if List.length model.yearList == 0 then
-                List.range (Date.year indexDate - 120) (Date.year indexDate + 120)
-            else
-                model.yearList
+            List.range (Date.year indexDate - 120) (Date.year indexDate + 120)
     in
         { model
             | indexDate =
@@ -174,7 +180,9 @@ setIndexDate model indexDate =
         }
 
 
-{-| datePickerInit returns an initialized DatePickerModel and a `Cmd` to initialize the picker
+{-| datePickerInit returns an initialized DatePickerModel. Do not throw out the returned command!
+The command is used to get today's current date which the date picker uses as the default for display.
+The string passed as the first argument must be a unique `id` for the datepicker
 
     import DatePicker exposing (datePickerInit)
 
@@ -319,8 +327,9 @@ that generally determine the range of selectable dates
 -}
 type alias DatePickerProps =
     { canSelectYear : Int -> Bool
-    , canSelectMonth : Int -> Month -> Bool
+    , canSelectMonth : Int -> Int -> Bool
     , canSelectDate : Date -> Bool
+    , hideFooter : Bool
     }
 
 
@@ -332,6 +341,7 @@ By default, nothing is restricted.
         { canSelectYear = \year -> True
         , canSelectMonth = \year month -> True
         , canSelectDate = \date -> True
+        , hideFooter = False
         }
 -}
 datePickerDefaultProps : DatePickerProps
@@ -339,6 +349,7 @@ datePickerDefaultProps =
     { canSelectYear = \year -> True
     , canSelectMonth = \year month -> True
     , canSelectDate = \date -> True
+    , hideFooter = True
     }
 
 
@@ -364,7 +375,7 @@ headerSection model props =
                     )
 
                 Nothing ->
-                    ( toString <| Date.year model.indexDate, getDayMonthText model.today )
+                    ( toString <| Date.year model.today, getDayMonthText model.today )
     in
         div
             [ class "edp-header-section"
@@ -420,29 +431,62 @@ headerSection model props =
 
 monthChangeSection : InitializedModel -> DatePickerProps -> Html DatePickerMsg
 monthChangeSection model props =
-    div
-        [ class "edp-month-change-section edp-body-section"
-        ]
-        [ div
-            [ onClick (PreviousMonth (add Month -1 model.indexDate))
+    let
+        year =
+            Date.year model.indexDate
+
+        month =
+            Date.month model.indexDate
+
+        canSelectNext =
+            props.canSelectMonth year <| getNextMonthNumber month
+
+        canSelectPrevious =
+            props.canSelectMonth year <| getPreviousMonthNumber month
+    in
+        div
+            [ class "edp-month-change-section edp-body-section"
             ]
-            [ i [ class "material-icons arrow-icon" ] [ text "keyboard_arrow_left" ]
+            [ div
+                [ onClick <|
+                    if canSelectPrevious then
+                        (PreviousMonth (add Month -1 model.indexDate))
+                    else
+                        NoOp
+                ]
+                [ i
+                    [ classList
+                        [ ( "material-icons arrow-icon", True )
+                        , ( "edp-disabled", canSelectPrevious == False )
+                        ]
+                    ]
+                    [ text "keyboard_arrow_left" ]
+                ]
+            , div []
+                [ text
+                    (let
+                        ( monthFull, monthInt ) =
+                            getMonthInfo (Date.month model.indexDate)
+                     in
+                        monthFull ++ " " ++ (toString <| Date.year model.indexDate)
+                    )
+                ]
+            , div
+                [ onClick <|
+                    if canSelectNext then
+                        (NextMonth (add Month 1 model.indexDate))
+                    else
+                        NoOp
+                ]
+                [ i
+                    [ classList
+                        [ ( "material-icons arrow-icon", True )
+                        , ( "edp-disabled", canSelectPrevious == False )
+                        ]
+                    ]
+                    [ text "keyboard_arrow_right" ]
+                ]
             ]
-        , div []
-            [ text
-                (let
-                    ( monthFull, monthInt ) =
-                        getMonthInfo (Date.month model.indexDate)
-                 in
-                    monthFull ++ " " ++ (toString <| Date.year model.indexDate)
-                )
-            ]
-        , div
-            [ onClick (NextMonth (add Month 1 model.indexDate))
-            ]
-            [ i [ class "material-icons arrow-icon" ] [ text "keyboard_arrow_right" ]
-            ]
-        ]
 
 
 weekSection : InitializedModel -> DatePickerProps -> Html DatePickerMsg
@@ -630,6 +674,11 @@ yearPickerSection model props =
 The main view for the datepicker. Use `Html.map` so the returned type doesn't conflict with
 your view's type.
 
+    import DatePicker exposing
+        ( datePickerView
+        , datePickerDefaultProps
+        )
+    ...
     view : Model -> Html Msg
     view model =
         datePickerView
@@ -656,6 +705,12 @@ datePickerView model props =
                             , yearList = model.yearList
                             , selectionMode = model.selectionMode
                             }
+
+                        footer =
+                            if props.hideFooter then
+                                div [] []
+                            else
+                                bottomSection initializedModel props
                     in
                         div
                             [ class "edp-container"
@@ -667,12 +722,12 @@ datePickerView model props =
                                         [ monthChangeSection initializedModel props
                                         , weekSection initializedModel props
                                         , daySection initializedModel props
-                                        , bottomSection initializedModel props
+                                        , footer
                                         ]
 
                                     YearPicker ->
                                         [ yearPickerSection initializedModel props
-                                        , bottomSection initializedModel props
+                                        , footer
                                         ]
                                 )
                             ]

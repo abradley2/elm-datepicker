@@ -1,9 +1,19 @@
 @require './Variables.styl'
 
+$disabled
+    color rgba(0, 0, 0, 0.24)
+    cursor not-allowed
+
+$scroller
+    position absolute
+    z-index 1
+    height 5px
+    left 0px
+    right 0px
+    background-color rgba(255, 255, 255, 0.5)
 
 .edp-container
     display inline-block
-    font-family Roboto
     width 300px
     overflow hidden
 
@@ -14,6 +24,7 @@
     .edp-header-active
         color white
     .edp-header-year
+        display inline-block
         &.edp-header-active
             font-weight bolder
         cursor pointer
@@ -122,6 +133,8 @@
         padding 8px
         cursor pointer
         color rgba(0, 0, 0, 0.54)
+        &.edp-disabled
+            @extends $disabled
 
 .edp-column
     width 40px
@@ -187,8 +200,7 @@
     &:focus
         outline none
     &.edp-disabled
-        color rgba(0, 0, 0, 0.24)
-        cursor not-allowed
+        @extends $disabled
 
 .edp-year-button
     color primary-color
@@ -203,7 +215,7 @@
     &.edp-year-button-selected
         height 50px
         line-height 50px
-        font-size 20px
+        font-size 32px
 
 
 .edp-year-picker
@@ -212,14 +224,6 @@
     display flex
     justify-content center
     overflow auto
-
-$scroller
-    position absolute
-    z-index 1
-    height 5px
-    left 0px
-    right 0px
-    background-color rgba(255, 255, 255, 0.5)
 
 .edp-year-scroller-top
     @extends $scroller

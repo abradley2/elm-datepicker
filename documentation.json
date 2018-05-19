@@ -1,11 +1,11 @@
 [
   {
     "name": "DatePicker",
-    "comment": " This library fills a bunch of important niches in Elm. A `Maybe` can help\nyou with optional arguments, error handling, and records with optional fields.\n\n# Tea / Initialization\n@docs DatePickerMsg, datePickerInit, datePickerUpdate, DatePickerModel\n\n# Rendering and Settings\n@docs datePickerView, DatePickerProps, datePickerDefaultProps\n\n# Helpers\n@docs setIndexDate\n\n# Types\n@docs SelectionMode\n",
+    "comment": " This module provides a material-style date picker for Elm. Since this date picker\nuses material-icons, you will need to have these included on your page.\nAlso include the `DatePicker.css` found in the root of this directory.\n\n\n    <link href=\"https://fonts.googleapis.com/icon?family=Material+Icons\" rel=\"stylesheet\">\n    <link rel=\"stylesheet\" type=\"text/css\" href=\"DatePicker.css\" />\n\n\nTo alter the color theme edit `./styl/Variables.styl`, then run\n`npm install && npm run build-styles`.\n\n\n# Tea / Initialization\n@docs DatePickerMsg, datePickerInit, datePickerUpdate, DatePickerModel\n\n# Rendering and Settings\n@docs datePickerView, DatePickerProps, datePickerDefaultProps\n\n# Helpers\n@docs setIndexDate\n\n# Types\n@docs SelectionMode\n",
     "aliases": [
       {
         "name": "DatePickerModel",
-        "comment": " The DatePickerModel type needs to be added to any data structure that requires a picker instance\n    import DatePicker exposing (DatePickerModel)\n\n    type alias Model =\n        { selectedDate : Maybe Date\n        , datePickerData : DatePickerModel\n        }\n    }\n\n    init : Model\n    ...\n\nThis is mostly an opaque type you don't have to worry about, though there are some important fields you will\nwant to use:\n\n* `today` is the default \"selected\" day of the picker before the user has actually clicked to \"select\" a day.\nThis is needed for the head display to not be empty when a user hasn't selected any date yet.\n* `indexDate` is a date used to track which month the calendar is currently showing. Do not set this directly. Use the `setIndexDate` helper\n* `selectedDate` is the last date the user clicked on in the calendar that was selectable\n* `selectionMode` determines whether the user sees the `Calendar` or the `YearPicker`\n",
+        "comment": " The DatePickerModel type needs to be added to any data structure that requires a picker instance\n\n    import DatePicker exposing (DatePickerModel)\n    ...\n    type alias Model =\n        { datePickerData : DatePickerModel\n        }\n    }\n\n\nThis is mostly an opaque type you don't have to worry about, though there are some important fields you will\nwant to use:\n\n* `today` is the default \"selected\" day of the picker before the user has actually clicked to \"select\" a day.\nThis is needed so the head display isn't empty before the user has selected anything, without forcing there be a default selected date of \"today\".\n* `indexDate` is a date used to track which month the calendar is currently showing. Do not set this directly. Use the `setIndexDate` helper\n* `selectedDate` is the last date the user clicked on in the calendar that was selectable\n* `selectionMode` determines whether the user sees the `Calendar` or the `YearPicker`\n",
         "args": [],
         "type": "{ id : String , today : Maybe.Maybe Date.Date , indexDate : Maybe.Maybe Date.Date , currentMonthMap : Maybe.Maybe (List ( Int, Date.Date )) , previousMonthMap : Maybe.Maybe (List ( Int, Date.Date )) , selectedDate : Maybe.Maybe Date.Date , previousSelectedDate : Maybe.Maybe Date.Date , selectionMode : DatePicker.SelectionMode , monthChange : DatePicker.MonthChange , yearList : List Int }"
       },
@@ -13,7 +13,7 @@
         "name": "DatePickerProps",
         "comment": " The second argument passed to datePickerView. These are configuration properties\nthat generally determine the range of selectable dates\n",
         "args": [],
-        "type": "{ canSelectYear : Int -> Bool , canSelectMonth : Int -> Date.Month -> Bool , canSelectDate : Date.Date -> Bool }"
+        "type": "{ canSelectYear : Int -> Bool , canSelectMonth : Int -> Int -> Bool , canSelectDate : Date.Date -> Bool , hideFooter : Bool }"
       }
     ],
     "types": [
@@ -33,12 +33,12 @@
     "values": [
       {
         "name": "datePickerDefaultProps",
-        "comment": " Use the default props if you don't want to support any sort of configuration.\nThese mostly center around limiting the user to a specific selection range of dates.\nBy default, nothing is restricted.\n\n    datePickerDefaultProps =\n        { canSelectYear = \\year -> True\n        , canSelectMonth = \\year month -> True\n        , canSelectDate = \\date -> True\n        }\n",
+        "comment": " Use the default props if you don't want to support any sort of configuration.\nThese mostly center around limiting the user to a specific selection range of dates.\nBy default, nothing is restricted.\n\n    datePickerDefaultProps =\n        { canSelectYear = \\year -> True\n        , canSelectMonth = \\year month -> True\n        , canSelectDate = \\date -> True\n        , hideFooter = False\n        }\n",
         "type": "DatePicker.DatePickerProps"
       },
       {
         "name": "datePickerInit",
-        "comment": " datePickerInit returns an initialized DatePickerModel and a `Cmd` to initialize the picker\n\n    import DatePicker exposing (datePickerInit)\n\n    init : (Model, Cmd Msg)\n    init =\n        let\n            (datePickerData, datePickerInitCmd) =\n                datePickerInit \"my-datepicker-id\"\n        in\n            ({ datePickerData = datePickerData\n             , selectedDate = Nothing\n             }\n             , Cmd.map HandleDatePickerMsg datePickerInitCmd\n            )\n",
+        "comment": " datePickerInit returns an initialized DatePickerModel. Do not throw out the returned command!\nThe command is used to get today's current date which the date picker uses as the default for display.\nThe string passed as the first argument must be a unique `id` for the datepicker\n\n    import DatePicker exposing (datePickerInit)\n\n    init : (Model, Cmd Msg)\n    init =\n        let\n            (datePickerData, datePickerInitCmd) =\n                datePickerInit \"my-datepicker-id\"\n        in\n            ({ datePickerData = datePickerData\n             , selectedDate = Nothing\n             }\n            , Cmd.map HandleDatePickerMsg datePickerInitCmd\n            )\n",
         "type": "String -> ( DatePicker.DatePickerModel , Platform.Cmd.Cmd DatePicker.DatePickerMsg )"
       },
       {
@@ -48,12 +48,12 @@
       },
       {
         "name": "datePickerView",
-        "comment": "\nThe main view for the datepicker. Use `Html.map` so the returned type doesn't conflict with\nyour view's type.\n\n    view : Model -> Html Msg\n    view model =\n        datePickerView\n            model.datePickerData\n            datePickerDefaultProps\n            |> Html.map OnDatePickerMsg\n",
+        "comment": "\nThe main view for the datepicker. Use `Html.map` so the returned type doesn't conflict with\nyour view's type.\n\n    import DatePicker exposing\n        ( datePickerView\n        , datePickerDefaultProps\n        )\n    ...\n    view : Model -> Html Msg\n    view model =\n        datePickerView\n            model.datePickerData\n            datePickerDefaultProps\n            |> Html.map OnDatePickerMsg\n",
         "type": "DatePicker.DatePickerModel -> DatePicker.DatePickerProps -> Html.Html DatePicker.DatePickerMsg"
       },
       {
         "name": "setIndexDate",
-        "comment": " Takes an instance of DatePickerModel and returns a new one with the given date. It is\nimportant to not just set indexDate directly as this will not refresh the data to completely\nreflect this\n",
+        "comment": " Takes an instance of DatePickerModel and returns a new one with the given index date. It is\nimportant to not just set indexDate directly as this will not refresh the data to completely\nreflect this\n",
         "type": "DatePicker.DatePickerModel -> Date.Date -> DatePicker.DatePickerModel"
       }
     ],

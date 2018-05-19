@@ -1,6 +1,19 @@
+.edp-month-change-section .arrow-icon.edp-disabled,
+.edp-button.edp-disabled {
+  color: rgba(0,0,0,0.24);
+  cursor: not-allowed;
+}
+.edp-year-scroller-top,
+.edp-year-scroller-bottom {
+  position: absolute;
+  z-index: 1;
+  height: 5px;
+  left: 0px;
+  right: 0px;
+  background-color: rgba(255,255,255,0.5);
+}
 .edp-container {
   display: inline-block;
-  font-family: Roboto;
   width: 300px;
   overflow: hidden;
 }
@@ -13,6 +26,7 @@
   color: #fff;
 }
 .edp-header-section .edp-header-year {
+  display: inline-block;
   cursor: pointer;
   font-size: 14px;
 }
@@ -149,10 +163,6 @@
 .edp-button:focus {
   outline: none;
 }
-.edp-button.edp-disabled {
-  color: rgba(0,0,0,0.24);
-  cursor: not-allowed;
-}
 .edp-year-button {
   color: #5a9789;
   padding: 0px;
@@ -168,7 +178,7 @@
 .edp-year-button.edp-year-button-selected {
   height: 50px;
   line-height: 50px;
-  font-size: 20px;
+  font-size: 32px;
 }
 .edp-year-picker {
   height: 320px;
@@ -176,15 +186,6 @@
   display: flex;
   justify-content: center;
   overflow: auto;
-}
-.edp-year-scroller-top,
-.edp-year-scroller-bottom {
-  position: absolute;
-  z-index: 1;
-  height: 5px;
-  left: 0px;
-  right: 0px;
-  background-color: rgba(255,255,255,0.5);
 }
 .edp-year-scroller-top {
   top: 0px;

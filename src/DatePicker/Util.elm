@@ -79,6 +79,18 @@ getMonthInfo month =
             ( "December", 12 )
 
 
+getMonthNumber month =
+    Tuple.second <| getMonthInfo month
+
+
+getNextMonthNumber =
+    (getMonthNumber >> (+) 2)
+
+
+getPreviousMonthNumber =
+    (getMonthNumber >> (\n -> n - 1))
+
+
 getLastDayOfMonth : Date -> Int -> Int
 getLastDayOfMonth date prevTry =
     let

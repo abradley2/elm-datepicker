@@ -9,7 +9,7 @@
     "build-styles": "stylus ./styl/DatePicker.styl -o ./",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Tony Bradley",
+  "author": "Tony Bradley antbradley91@gmail.com",
   "license": "MIT",
   "dependencies": {
     "elm-live": "^2.7.5"
