@@ -1,6 +1,6 @@
 {
   "name": "elm-datepicker",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "A datepicker for elm",
   "main": "index.html",
   "scripts": {

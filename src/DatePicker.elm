@@ -13,7 +13,7 @@ module DatePicker
         )
 
 {-| This module provides a material-style date picker for Elm.
-[You can out the demo here.](http://abradley2.github.io/elm-datepicker/)
+[You can check out the demo here.](http://abradley2.github.io/elm-datepicker/)
 Since this date picker
 uses material-icons, you will need to have these included on your page.
 Also include the `DatePicker.css` found in the root of this directory.
