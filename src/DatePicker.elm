@@ -1,15 +1,15 @@
 module DatePicker
     exposing
-        ( datePickerView
-        , datePickerInit
-        , setIndexDate
-        , datePickerDefaultProps
-        , datePickerUpdate
+        ( view
+        , init
+        , defaultProps
+        , update
         , SelectionMode
-        , DatePickerProps
-        , DatePickerModel
-        , DatePickerMsg
-        , DatePickerMsg(..)
+        , Props
+        , Model
+        , Msg
+        , Msg(..)
+        , setIndexDate
         )
 
 {-| This module provides a material-style date picker for Elm.
@@ -28,10 +28,10 @@ To alter the color theme edit `./styl/Variables.styl`, then run
 
 
 # Tea / Initialization
-@docs DatePickerMsg, datePickerInit, datePickerUpdate, DatePickerModel
+@docs Msg, init, update, Model
 
 # Rendering and Settings
-@docs datePickerView, DatePickerProps, datePickerDefaultProps
+@docs view, Props, defaultProps
 
 # Helpers
 @docs setIndexDate
@@ -71,16 +71,16 @@ type MonthChange
     | Next
 
 
-{-| You will first need to add the `DatePickerMsg` to the type consumed by your `update` function so
+{-| You will first need to add the `DatePicker.Msg` to the type consumed by your `update` function so
 it recognizes this type.
 
-    import DatePicker exposing (DatePickerMsg, DatePickerMsg(..))
+    import DatePicker
     ...
     type Msg
         = FireZeMissiles
-        |  DatePickerMsg
+        | DatePickerMsg DatePicker.Msg
 -}
-type DatePickerMsg
+type Msg
     = NoOp
     | DateSelected Date Date
     | GetToday Date
@@ -92,12 +92,12 @@ type DatePickerMsg
     | SetSelectionMode SelectionMode
 
 
-{-| The DatePickerModel type needs to be added to any data structure that requires a picker instance
+{-| The `DatePicker.Model` type needs to be added to any data structure that requires a picker instance
 
-    import DatePicker exposing (DatePickerModel)
+    import DatePicker
     ...
     type alias Model =
-        { datePickerData : DatePickerModel
+        { datePickerData : DatePicker.Model
         }
     }
 
@@ -111,7 +111,7 @@ This is needed so the head display isn't empty before the user has selected anyt
 * `selectedDate` is the last date the user clicked on in the calendar that was selectable
 * `selectionMode` determines whether the user sees the `Calendar` or the `YearPicker`
 -}
-type alias DatePickerModel =
+type alias Model =
     { id : String
     , today : Maybe Date
     , indexDate : Maybe Date
@@ -139,23 +139,11 @@ type alias InitializedModel =
     }
 
 
-setDayOfMonth : Date -> Int -> Date
-setDayOfMonth date num =
-    dateFromFields
-        (Date.year date)
-        (Date.month date)
-        num
-        0
-        0
-        0
-        0
-
-
-{-| Takes an instance of DatePickerModel and returns a new one with the given index date. It is
+{-| Takes any of type `DatePicker.Model` and returns a new one with the given index date. It is
 important to not just set indexDate directly as this will not refresh the data to completely
 reflect this
 -}
-setIndexDate : DatePickerModel -> Date -> DatePickerModel
+setIndexDate : Model -> Date -> Model
 setIndexDate model indexDate =
     let
         lastDayOfMonth =
@@ -182,26 +170,26 @@ setIndexDate model indexDate =
         }
 
 
-{-| datePickerInit returns an initialized DatePickerModel. Do not throw out the returned command!
+{-| `DatePicker.init` returns an initialized record of `DatePicker.Model`. Do not throw out the returned command!
 The command is used to get today's current date which the date picker uses as the default for display.
-The string passed as the first argument must be a unique `id` for the datepicker
+The string passed as the first argument must be a unique `id` for the date picker
 
-    import DatePicker exposing (datePickerInit)
+    import DatePicker
 
     init : (Model, Cmd Msg)
     init =
         let
             (datePickerData, datePickerInitCmd) =
-                datePickerInit "my-datepicker-id"
+                DatePicker.init "my-datepicker-id"
         in
             ({ datePickerData = datePickerData
              , selectedDate = Nothing
              }
-            , Cmd.map HandleDatePickerMsg datePickerInitCmd
+            , Cmd.map DatePickerMsg datePickerInitCmd
             )
 -}
-datePickerInit : String -> ( DatePickerModel, Cmd DatePickerMsg )
-datePickerInit id =
+init : String -> ( Model, Cmd Msg )
+init id =
     ( { id = id
       , today = Nothing
       , indexDate = Nothing
@@ -217,24 +205,21 @@ datePickerInit id =
     )
 
 
-{-| datePickerUpdate consumes the message you've mapped and a `DatePickerModel` to output `( DatePickerModel, Cmd DatePickerMsg)`.
-You will need to alter your update function to handle any `DatePickerMsg` that flows through.
+{-| `DatePicker.update` consumes the message you've mapped and a `DatePicker.Model` record to output `( DatePicker.Model, Cmd DatePicker.Msg)`.
+You will need to alter your update function to handle any `DatePicker.Msg` that flows through.
 
 
-    import DatePicker exposing
-        ( datePickerUpdate
-        , DatePickerMsg(SelectDate)
-        )
+    import DatePicker exposing (Msg(SelectDate))
     ...
     handleDatePickerMsg model datePickerMsg =
         let
             (datePickerData, datePickerCmd) =
-                datePickerUpdate datePickerMsg model.datePickerData
+                DatePicker.update datePickerMsg model.datePickerData
         in
             ({ model
              | datePickerData = datePickerData
              }
-            , Cmd.map HandleDatePickerMsg datePickerCmd
+            , Cmd.map DatePickerMsg datePickerCmd
             )
     ...
     update : Msg -> Model -> ( Model, Cmd Msg )
@@ -243,11 +228,11 @@ You will need to alter your update function to handle any `DatePickerMsg` that f
             NoOp ->
                 ( model, Cmd.none )
 
-            HandleDatePickerMsg datePickerMsg ->
+            DatePickerMsg datePickerMsg ->
                 handleDatePickerMsg model datePickerMsg
 -}
-datePickerUpdate : DatePickerMsg -> DatePickerModel -> ( DatePickerModel, Cmd DatePickerMsg )
-datePickerUpdate msg model =
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
     case msg of
         NoOp ->
             ( model, Cmd.none )
@@ -324,10 +309,10 @@ datePickerUpdate msg model =
             ( model, Cmd.none )
 
 
-{-| The second argument passed to datePickerView. These are configuration properties
+{-| The second argument passed to `DatePicker.view`. These are configuration properties
 that generally determine the range of selectable dates
 -}
-type alias DatePickerProps =
+type alias Props =
     { canSelectYear : Int -> Bool
     , canSelectMonth : Int -> Int -> Bool
     , canSelectDate : Date -> Bool
@@ -339,15 +324,15 @@ type alias DatePickerProps =
 These mostly center around limiting the user to a specific selection range of dates.
 By default, nothing is restricted.
 
-    datePickerDefaultProps =
+    defaultProps =
         { canSelectYear = \year -> True
         , canSelectMonth = \year month -> True
         , canSelectDate = \date -> True
         , hideFooter = False
         }
 -}
-datePickerDefaultProps : DatePickerProps
-datePickerDefaultProps =
+defaultProps : Props
+defaultProps =
     { canSelectYear = \year -> True
     , canSelectMonth = \year month -> True
     , canSelectDate = \date -> True
@@ -355,18 +340,7 @@ datePickerDefaultProps =
     }
 
 
-getDayMonthText date =
-    let
-        ( monthFull, monthInt ) =
-            getMonthInfo <| Date.month date
-
-        ( dayShort, dayInt ) =
-            getDayInfo <| Date.dayOfWeek date
-    in
-        dayShort ++ ", " ++ (String.slice 0 3 monthFull) ++ " " ++ (toString <| Date.day date)
-
-
-headerSection : InitializedModel -> DatePickerProps -> Html DatePickerMsg
+headerSection : InitializedModel -> Props -> Html Msg
 headerSection model props =
     let
         ( yearText, dayMonthText ) =
@@ -431,7 +405,7 @@ headerSection model props =
             ]
 
 
-monthChangeSection : InitializedModel -> DatePickerProps -> Html DatePickerMsg
+monthChangeSection : InitializedModel -> Props -> Html Msg
 monthChangeSection model props =
     let
         year =
@@ -491,7 +465,7 @@ monthChangeSection model props =
             ]
 
 
-weekSection : InitializedModel -> DatePickerProps -> Html DatePickerMsg
+weekSection : InitializedModel -> Props -> Html Msg
 weekSection model props =
     div [ class "edp-body-section" ]
         (List.map
@@ -502,7 +476,7 @@ weekSection model props =
         )
 
 
-daySectionMonth : InitializedModel -> DatePickerProps -> Html DatePickerMsg
+daySectionMonth : InitializedModel -> Props -> Html Msg
 daySectionMonth model props =
     div [ class "edp-body-section" ]
         (List.map
@@ -550,7 +524,7 @@ daySectionMonth model props =
         )
 
 
-daySection : InitializedModel -> DatePickerProps -> Html DatePickerMsg
+daySection : InitializedModel -> Props -> Html Msg
 daySection model props =
     Keyed.node "div"
         [ class "edp-month-wrapper"
@@ -596,7 +570,7 @@ daySection model props =
         )
 
 
-bottomSection : InitializedModel -> DatePickerProps -> Html DatePickerMsg
+bottomSection : InitializedModel -> Props -> Html Msg
 bottomSection model props =
     let
         disableOk =
@@ -626,7 +600,7 @@ bottomSection model props =
             ]
 
 
-yearPickerSection : InitializedModel -> DatePickerProps -> Html DatePickerMsg
+yearPickerSection : InitializedModel -> Props -> Html Msg
 yearPickerSection model props =
     div
         [ classList
@@ -673,74 +647,64 @@ yearPickerSection model props =
 
 
 {-|
-The main view for the datepicker. Use `Html.map` so the returned type doesn't conflict with
+The main view for the date picker. Use `Html.map` so the returned type doesn't conflict with
 your view's type.
 
-    import DatePicker exposing
-        ( datePickerView
-        , datePickerDefaultProps
-        )
+    import DatePicker
     ...
     view : Model -> Html Msg
     view model =
-        datePickerView
-            model.datePickerData
-            datePickerDefaultProps
-            |> Html.map OnDatePickerMsg
+        Html.map DatePickerMsg <|
+            DatePicker.view
+                model.datePickerData
+                DatePicker.defaultProps
+
 -}
-datePickerView : DatePickerModel -> DatePickerProps -> Html DatePickerMsg
-datePickerView model props =
-    let
-        result =
-            Maybe.map3
-                (\today indexDate currentMonthMap ->
-                    let
-                        initializedModel =
-                            { id = model.id
-                            , today = today
-                            , indexDate = indexDate
-                            , selectedDate = model.selectedDate
-                            , previousSelectedDate = model.previousSelectedDate
-                            , currentMonthMap = currentMonthMap
-                            , previousMonthMap = model.previousMonthMap
-                            , monthChange = model.monthChange
-                            , yearList = model.yearList
-                            , selectionMode = model.selectionMode
-                            }
+view : Model -> Props -> Html Msg
+view model props =
+    Maybe.withDefault (div [ class "edp-container" ] []) <|
+        Maybe.map3
+            (\today indexDate currentMonthMap ->
+                let
+                    initializedModel =
+                        { id = model.id
+                        , today = today
+                        , indexDate = indexDate
+                        , selectedDate = model.selectedDate
+                        , previousSelectedDate = model.previousSelectedDate
+                        , currentMonthMap = currentMonthMap
+                        , previousMonthMap = model.previousMonthMap
+                        , monthChange = model.monthChange
+                        , yearList = model.yearList
+                        , selectionMode = model.selectionMode
+                        }
 
-                        footer =
-                            if props.hideFooter then
-                                div [] []
-                            else
-                                bottomSection initializedModel props
-                    in
-                        div
-                            [ class "edp-container"
-                            ]
-                            [ headerSection initializedModel props
-                            , div []
-                                (case model.selectionMode of
-                                    Calendar ->
-                                        [ monthChangeSection initializedModel props
-                                        , weekSection initializedModel props
-                                        , daySection initializedModel props
-                                        , footer
-                                        ]
+                    footer =
+                        if props.hideFooter then
+                            div [] []
+                        else
+                            bottomSection initializedModel props
+                in
+                    div
+                        [ class "edp-container"
+                        ]
+                        [ headerSection initializedModel props
+                        , div []
+                            (case model.selectionMode of
+                                Calendar ->
+                                    [ monthChangeSection initializedModel props
+                                    , weekSection initializedModel props
+                                    , daySection initializedModel props
+                                    , footer
+                                    ]
 
-                                    YearPicker ->
-                                        [ yearPickerSection initializedModel props
-                                        , footer
-                                        ]
-                                )
-                            ]
-                )
-                model.today
-                model.indexDate
-                model.currentMonthMap
-    in
-        case result of
-            Just initialized ->
-                initialized
-
-            Nothing ->
-                div [ class "edp-container" ] []
+                                YearPicker ->
+                                    [ yearPickerSection initializedModel props
+                                    , footer
+                                    ]
+                            )
+                        ]
+            )
+            model.today
+            model.indexDate
+            model.currentMonthMap

@@ -32,11 +32,7 @@ getDayInfo day =
 
 getDayNum : Date -> Int
 getDayNum date =
-    let
-        ( str, int ) =
-            getDayInfo (Date.dayOfWeek date)
-    in
-        int
+    Tuple.second <| getDayInfo (Date.dayOfWeek date)
 
 
 getMonthInfo : Month -> ( String, Int )
@@ -140,3 +136,26 @@ buildMonthMap currentMap currentDay lastDay firstDate indexDate =
                     (getDayNum firstDate) - 1
             in
                 padMonthMap 0 padSize newMap
+
+
+setDayOfMonth : Date -> Int -> Date
+setDayOfMonth date num =
+    dateFromFields
+        (Date.year date)
+        (Date.month date)
+        num
+        0
+        0
+        0
+        0
+
+
+getDayMonthText date =
+    let
+        ( monthFull, monthInt ) =
+            getMonthInfo <| Date.month date
+
+        ( dayShort, dayInt ) =
+            getDayInfo <| Date.dayOfWeek date
+    in
+        dayShort ++ ", " ++ (String.slice 0 3 monthFull) ++ " " ++ (toString <| Date.day date)

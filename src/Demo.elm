@@ -5,39 +5,30 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Date exposing (..)
-import DatePicker
-    exposing
-        ( DatePickerModel
-        , DatePickerMsg
-        , DatePickerMsg(..)
-        , datePickerInit
-        , datePickerUpdate
-        , datePickerView
-        , datePickerDefaultProps
-        )
+import DatePicker exposing (Msg(..))
 
 
 type alias Model =
     { selectedDate : Maybe Date
-    , datePickerData : DatePickerModel
+    , datePickerData : DatePicker.Model
     }
 
 
 type Msg
     = NoOp
-    | OnDatePickerMsg DatePickerMsg
+    | DatePickerMsg DatePicker.Msg
 
 
 init : ( Model, Cmd Msg )
 init =
     let
         ( datePickerData, datePickerCmd ) =
-            datePickerInit "my-datepicker"
+            DatePicker.init "my-datepicker"
     in
         ( { datePickerData = datePickerData
           , selectedDate = Nothing
           }
-        , Cmd.map OnDatePickerMsg datePickerCmd
+        , Cmd.map DatePickerMsg datePickerCmd
         )
 
 
@@ -47,13 +38,13 @@ update msg model =
         NoOp ->
             ( model, Cmd.none )
 
-        OnDatePickerMsg datePickerMsg ->
-            datePickerUpdate datePickerMsg model.datePickerData
+        DatePickerMsg datePickerMsg ->
+            DatePicker.update datePickerMsg model.datePickerData
                 -- set the data returned from datePickerUpdate. Don't discard the command!
                 |>
                     (\( data, cmd ) ->
                         ( { model | datePickerData = data }
-                        , Cmd.map OnDatePickerMsg cmd
+                        , Cmd.map DatePickerMsg cmd
                         )
                     )
                 -- and now we can respond to any internal messages we want
@@ -89,10 +80,10 @@ view model =
                 , ( "box-shadow", "0 1px 3px rgba(0, 0, 0, 0.24)" )
                 ]
             ]
-            [ datePickerView
+            [ DatePicker.view
                 model.datePickerData
-                datePickerDefaultProps
-                |> Html.map OnDatePickerMsg
+                DatePicker.defaultProps
+                |> Html.map DatePickerMsg
             ]
         ]
 
