@@ -159,3 +159,7 @@ getDayMonthText date =
             getDayInfo <| Date.dayOfWeek date
     in
         dayShort ++ ", " ++ (String.slice 0 3 monthFull) ++ " " ++ (toString <| Date.day date)
+
+
+isJust =
+    (Maybe.map (\_ -> True) >> Maybe.withDefault False)

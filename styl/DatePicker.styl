@@ -1,7 +1,7 @@
 @require './Variables.styl'
 
 $disabled
-    color rgba(0, 0, 0, 0.24)
+    color medium-shade
     cursor not-allowed
 
 
@@ -13,7 +13,7 @@ $disabled
     .edp-header-section
         background-color primary-color
         padding 16px 24px
-        color rgba(255, 255, 255, 0.8)
+        color white-fade
         .edp-header-active
             color white
         .edp-header-year
@@ -47,7 +47,7 @@ $disabled
         &.edp-month-day-previous
             margin-right 1px
             animation-name edp-slideupprevious
-        &.edp-month-day-next
+        &:not(.edp-month-day-previous)
             margin-right 1px
             animation-name edp-slideupnext
 
@@ -71,13 +71,13 @@ $disabled
 
     .edp-month-change-section
         display flex
-        color rgba(0, 0, 0, 0.86)
+        color font-color
         justify-content space-between
         align-items center
         .arrow-icon
             padding 8px
             cursor pointer
-            color rgba(0, 0, 0, 0.54)
+            color label-color
             &.edp-disabled
                 @extends $disabled
 
@@ -100,7 +100,7 @@ $disabled
         background-color rgba(0, 0, 0, 0)
         cursor pointer
         &:hover:not(.edp-empty-column):not(.edp-disabled-column):not(.edp-day-number-selected)
-            background-color rgba(0, 0, 0, 0.1)
+            background-color light-shade
         &.edp-day-number-today
             color primary-color
             font-weight bolder
@@ -112,7 +112,7 @@ $disabled
         color rgba(255, 255, 255, 0)
 
     .edp-disabled-column
-        color rgba(0, 0, 0, 0.54)
+        color label-color
 
     .edp-body-section
         background-color white
@@ -141,7 +141,7 @@ $disabled
         &:not(:last-child)
             margin-right 16px
         &:hover:not(.edp-disabled)
-            background-color rgba(0, 0, 0, 0.1)
+            background-color light-shade
         &:focus
             outline none
         &.edp-disabled
@@ -156,7 +156,7 @@ $disabled
         height 40px
         line-height 40px
         &:hover
-            box-shadow  0 1px 3px rgba(0,0,0,0.24)
+            box-shadow  0 1px 3px medium-shade
         &.edp-year-button-selected
             height 50px
             line-height 50px

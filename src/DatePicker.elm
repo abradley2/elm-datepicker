@@ -183,9 +183,9 @@ The string passed as the first argument must be a unique `id` for the date picke
             (datePickerData, datePickerInitCmd) =
                 DatePicker.init "my-datepicker-id"
         in
-            ({ datePickerData = datePickerData
-             , selectedDate = Nothing
-             }
+            ( { datePickerData = datePickerData
+              , selectedDate = Nothing
+              }
             , Cmd.map DatePickerMsg datePickerInitCmd
             )
 -}
@@ -217,9 +217,9 @@ You will need to alter your update function to handle any `DatePicker.Msg` that 
             (datePickerData, datePickerCmd) =
                 DatePicker.update datePickerMsg model.datePickerData
         in
-            ({ model
-             | datePickerData = datePickerData
-             }
+            ( { model
+              | datePickerData = datePickerData
+              }
             , Cmd.map DatePickerMsg datePickerCmd
             )
     ...
@@ -264,6 +264,7 @@ update msg model =
             in
                 ( { newModel
                     | selectionMode = Calendar
+                    , previousMonthMap = Nothing
                   }
                 , Cmd.none
                 )
@@ -337,73 +338,70 @@ defaultProps =
     { canSelectYear = \year -> True
     , canSelectMonth = \year month -> True
     , canSelectDate = \date -> True
-    , hideFooter = True
+    , hideFooter = False
     }
 
 
-headerSection : InitializedModel -> Props -> Html Msg
-headerSection model props =
-    let
-        ( yearText, dayMonthText ) =
-            case model.selectedDate of
-                Just selected ->
-                    ( toString <| Date.year selected
-                    , getDayMonthText selected
-                    )
+displayYear =
+    (Date.year >> toString >> text)
 
-                Nothing ->
-                    ( toString <| Date.year model.today, getDayMonthText model.today )
-    in
-        div
-            [ class "edp-header-section"
+
+headerYearDisplay : Date -> InitializedModel -> Props -> Html Msg
+headerYearDisplay displayDate model props =
+    div
+        [ classList
+            [ ( "edp-header-year", True )
+            , ( "edp-header-active", model.selectionMode == YearPicker )
             ]
-            [ div
-                [ classList
-                    [ ( "edp-header-year", True )
-                    , ( "edp-header-active", Debug.log "year is active " <| model.selectionMode == YearPicker )
-                    ]
-                , onClick (SetSelectionMode YearPicker)
-                ]
-                [ text yearText ]
-            , Keyed.node "div"
-                [ class "edp-month-day-wrapper"
-                ]
-                ([ ( dayMonthText
-                   , div
-                        [ classList
-                            [ ( "edp-header-month-day", True )
-                            , ( "edp-header-active", model.selectionMode == Calendar )
-                            , ( "edp-month-day-next", True )
-                            ]
-                        , onClick (SetSelectionMode Calendar)
-                        ]
-                        [ text dayMonthText
-                        ]
-                   )
-                 ]
-                    -- if we have a previous date we need to render this in so we have an animation
-                    ++
-                        (case model.previousSelectedDate of
-                            Just previousDate ->
-                                [ ( getDayMonthText previousDate
-                                  , div
-                                        [ classList
-                                            [ ( "edp-header-month-day", True )
-                                            , ( "edp-header-active", model.selectionMode == Calendar )
-                                            , ( "edp-month-day-previous", True )
-                                            ]
-                                        , onClick (SetSelectionMode Calendar)
-                                        ]
-                                        [ text (getDayMonthText previousDate)
-                                        ]
-                                  )
-                                ]
+        , onClick (SetSelectionMode YearPicker)
+        ]
+        [ displayYear displayDate ]
 
-                            Nothing ->
-                                [ ( "empty", div [] [] ) ]
-                        )
+
+headerDayMonthDisplay : Bool -> Maybe Date -> InitializedModel -> Maybe ( String, Html Msg )
+headerDayMonthDisplay isPreviousDate date model =
+    Maybe.map
+        (\justDate ->
+            ( getDayMonthText justDate
+            , div
+                [ classList
+                    [ ( "edp-header-month-day", True )
+                    , ( "edp-header-active", model.selectionMode == Calendar )
+                    , ( "edp-month-day-previous", isPreviousDate )
+                    ]
+                , onClick (SetSelectionMode Calendar)
+                ]
+                [ text (getDayMonthText justDate)
+                ]
+            )
+        )
+        date
+
+
+headerSection : Date -> InitializedModel -> Props -> Html Msg
+headerSection displayDate model props =
+    div
+        [ class "edp-header-section"
+        ]
+        [ headerYearDisplay displayDate model props
+        , Keyed.node "div"
+            [ class "edp-month-day-wrapper"
+            ]
+            [ Maybe.withDefault
+                ( "previous", div [] [] )
+                (headerDayMonthDisplay True model.previousSelectedDate model)
+            , Maybe.withDefault
+                ( "current", div [] [] )
+                (headerDayMonthDisplay False
+                    (if isJust model.selectedDate then
+                        model.selectedDate
+                     else
+                        Just model.today
+                    )
+                    model
                 )
             ]
+        ]
 
 
 monthChangeSection : InitializedModel -> Props -> Html Msg
@@ -665,6 +663,9 @@ view model props =
         Maybe.map3
             (\today indexDate currentMonthMap ->
                 let
+                    displayDate =
+                        Maybe.withDefault today model.selectedDate
+
                     initializedModel =
                         { id = model.id
                         , today = today
@@ -687,7 +688,7 @@ view model props =
                     div
                         [ class "edp-container"
                         ]
-                        [ headerSection initializedModel props
+                        [ headerSection displayDate initializedModel props
                         , div []
                             (case model.selectionMode of
                                 Calendar ->
