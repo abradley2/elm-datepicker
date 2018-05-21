@@ -13890,6 +13890,12 @@ var _abradley2$elm_datepicker$DatePicker_Util$getDayMonthText = function (date) 
 						_elm_lang$core$Date$day(date))))));
 };
 
+var _abradley2$elm_datepicker$DatePicker$getMonthKey = function (date) {
+	return _elm_lang$core$Basics$toString(
+		_elm_lang$core$Tuple$first(
+			_abradley2$elm_datepicker$DatePicker_Util$getMonthInfo(
+				_elm_lang$core$Date$month(date))));
+};
 var _abradley2$elm_datepicker$DatePicker$weekSection = F2(
 	function (model, props) {
 		return A2(
@@ -14038,6 +14044,7 @@ var _abradley2$elm_datepicker$DatePicker$YearPicker = {ctor: 'YearPicker'};
 var _abradley2$elm_datepicker$DatePicker$Calendar = {ctor: 'Calendar'};
 var _abradley2$elm_datepicker$DatePicker$Next = {ctor: 'Next'};
 var _abradley2$elm_datepicker$DatePicker$Previous = {ctor: 'Previous'};
+var _abradley2$elm_datepicker$DatePicker$None = {ctor: 'None'};
 var _abradley2$elm_datepicker$DatePicker$SetSelectionMode = function (a) {
 	return {ctor: 'SetSelectionMode', _0: a};
 };
@@ -14359,7 +14366,7 @@ var _abradley2$elm_datepicker$DatePicker$init = function (id) {
 			selectedDate: _elm_lang$core$Maybe$Nothing,
 			previousSelectedDate: _elm_lang$core$Maybe$Nothing,
 			selectionMode: _abradley2$elm_datepicker$DatePicker$Calendar,
-			monthChange: _abradley2$elm_datepicker$DatePicker$Next,
+			monthChange: _abradley2$elm_datepicker$DatePicker$None,
 			yearList: {ctor: '[]'}
 		},
 		_1: A2(_elm_lang$core$Task$perform, _abradley2$elm_datepicker$DatePicker$GetToday, _elm_lang$core$Date$now)
@@ -14688,7 +14695,60 @@ var _abradley2$elm_datepicker$DatePicker$daySectionMonth = F2(
 				},
 				model.currentMonthMap));
 	});
-var _abradley2$elm_datepicker$DatePicker$daySection = F2(
+var _abradley2$elm_datepicker$DatePicker$previousMonthBody = F2(
+	function (model, props) {
+		return A2(
+			_elm_lang$core$Maybe$map,
+			function (previousMonthMap) {
+				return {
+					ctor: '_Tuple2',
+					_0: A2(
+						_elm_lang$core$Basics_ops['++'],
+						_abradley2$elm_datepicker$DatePicker$getMonthKey(model.indexDate),
+						'-previous'),
+					_1: A2(
+						_elm_lang$html$Html$div,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$classList(
+								{
+									ctor: '::',
+									_0: {ctor: '_Tuple2', _0: 'edp-month-slider', _1: true},
+									_1: {
+										ctor: '::',
+										_0: {
+											ctor: '_Tuple2',
+											_0: 'edp-out-next',
+											_1: _elm_lang$core$Native_Utils.eq(model.monthChange, _abradley2$elm_datepicker$DatePicker$Next)
+										},
+										_1: {
+											ctor: '::',
+											_0: {
+												ctor: '_Tuple2',
+												_0: 'edp-out-previous',
+												_1: _elm_lang$core$Native_Utils.eq(model.monthChange, _abradley2$elm_datepicker$DatePicker$Previous)
+											},
+											_1: {ctor: '[]'}
+										}
+									}
+								}),
+							_1: {ctor: '[]'}
+						},
+						{
+							ctor: '::',
+							_0: A2(
+								_abradley2$elm_datepicker$DatePicker$daySectionMonth,
+								_elm_lang$core$Native_Utils.update(
+									model,
+									{currentMonthMap: previousMonthMap}),
+								props),
+							_1: {ctor: '[]'}
+						})
+				};
+			},
+			model.previousMonthMap);
+	});
+var _abradley2$elm_datepicker$DatePicker$calendarBody = F2(
 	function (model, props) {
 		return A3(
 			_elm_lang$html$Html_Keyed$node,
@@ -14698,122 +14758,61 @@ var _abradley2$elm_datepicker$DatePicker$daySection = F2(
 				_0: _elm_lang$html$Html_Attributes$class('edp-month-wrapper'),
 				_1: {ctor: '[]'}
 			},
-			function () {
-				var _p17 = model.previousMonthMap;
-				if (_p17.ctor === 'Just') {
-					var monthString = _elm_lang$core$Basics$toString(
-						_elm_lang$core$Tuple$first(
-							_abradley2$elm_datepicker$DatePicker_Util$getMonthInfo(
-								_elm_lang$core$Date$month(model.indexDate))));
-					return {
-						ctor: '::',
-						_0: {
-							ctor: '_Tuple2',
-							_0: A2(_elm_lang$core$Basics_ops['++'], monthString, '-previous'),
-							_1: A2(
-								_elm_lang$html$Html$div,
-								{
-									ctor: '::',
-									_0: _elm_lang$html$Html_Attributes$classList(
-										{
+			{
+				ctor: '::',
+				_0: A2(
+					_elm_lang$core$Maybe$withDefault,
+					{
+						ctor: '_Tuple2',
+						_0: 'only',
+						_1: A2(
+							_elm_lang$html$Html$div,
+							{ctor: '[]'},
+							{ctor: '[]'})
+					},
+					A2(_abradley2$elm_datepicker$DatePicker$previousMonthBody, model, props)),
+				_1: {
+					ctor: '::',
+					_0: {
+						ctor: '_Tuple2',
+						_0: _abradley2$elm_datepicker$DatePicker$getMonthKey(model.indexDate),
+						_1: A2(
+							_elm_lang$html$Html$div,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$classList(
+									{
+										ctor: '::',
+										_0: {ctor: '_Tuple2', _0: 'edp-month-slider', _1: true},
+										_1: {
 											ctor: '::',
-											_0: {ctor: '_Tuple2', _0: 'edp-month-slider', _1: true},
+											_0: {
+												ctor: '_Tuple2',
+												_0: 'edp-in-next',
+												_1: _elm_lang$core$Native_Utils.eq(model.monthChange, _abradley2$elm_datepicker$DatePicker$Next)
+											},
 											_1: {
 												ctor: '::',
 												_0: {
 													ctor: '_Tuple2',
-													_0: 'edp-out-next',
-													_1: _elm_lang$core$Native_Utils.eq(model.monthChange, _abradley2$elm_datepicker$DatePicker$Next)
+													_0: 'edp-in-previous',
+													_1: _elm_lang$core$Native_Utils.eq(model.monthChange, _abradley2$elm_datepicker$DatePicker$Previous)
 												},
-												_1: {
-													ctor: '::',
-													_0: {
-														ctor: '_Tuple2',
-														_0: 'edp-out-previous',
-														_1: !_elm_lang$core$Native_Utils.eq(model.monthChange, _abradley2$elm_datepicker$DatePicker$Next)
-													},
-													_1: {ctor: '[]'}
-												}
+												_1: {ctor: '[]'}
 											}
-										}),
-									_1: {ctor: '[]'}
-								},
-								{
-									ctor: '::',
-									_0: A2(
-										_abradley2$elm_datepicker$DatePicker$daySectionMonth,
-										_elm_lang$core$Native_Utils.update(
-											model,
-											{currentMonthMap: _p17._0}),
-										props),
-									_1: {ctor: '[]'}
-								})
-						},
-						_1: {
-							ctor: '::',
-							_0: {
-								ctor: '_Tuple2',
-								_0: monthString,
-								_1: A2(
-									_elm_lang$html$Html$div,
-									{
-										ctor: '::',
-										_0: _elm_lang$html$Html_Attributes$classList(
-											{
-												ctor: '::',
-												_0: {ctor: '_Tuple2', _0: 'edp-month-slider', _1: true},
-												_1: {
-													ctor: '::',
-													_0: {
-														ctor: '_Tuple2',
-														_0: 'edp-in-next',
-														_1: _elm_lang$core$Native_Utils.eq(model.monthChange, _abradley2$elm_datepicker$DatePicker$Next)
-													},
-													_1: {
-														ctor: '::',
-														_0: {
-															ctor: '_Tuple2',
-															_0: 'edp-in-previous',
-															_1: !_elm_lang$core$Native_Utils.eq(model.monthChange, _abradley2$elm_datepicker$DatePicker$Next)
-														},
-														_1: {ctor: '[]'}
-													}
-												}
-											}),
-										_1: {ctor: '[]'}
-									},
-									{
-										ctor: '::',
-										_0: A2(_abradley2$elm_datepicker$DatePicker$daySectionMonth, model, props),
-										_1: {ctor: '[]'}
-									})
+										}
+									}),
+								_1: {ctor: '[]'}
 							},
-							_1: {ctor: '[]'}
-						}
-					};
-				} else {
-					return {
-						ctor: '::',
-						_0: {
-							ctor: '_Tuple2',
-							_0: 'key.only',
-							_1: A2(
-								_elm_lang$html$Html$div,
-								{
-									ctor: '::',
-									_0: _elm_lang$html$Html_Attributes$class('edp-month-slider'),
-									_1: {ctor: '[]'}
-								},
-								{
-									ctor: '::',
-									_0: A2(_abradley2$elm_datepicker$DatePicker$daySectionMonth, model, props),
-									_1: {ctor: '[]'}
-								})
-						},
-						_1: {ctor: '[]'}
-					};
+							{
+								ctor: '::',
+								_0: A2(_abradley2$elm_datepicker$DatePicker$daySectionMonth, model, props),
+								_1: {ctor: '[]'}
+							})
+					},
+					_1: {ctor: '[]'}
 				}
-			}());
+			});
 	});
 var _abradley2$elm_datepicker$DatePicker$bottomSection = F2(
 	function (model, props) {
@@ -14867,9 +14866,9 @@ var _abradley2$elm_datepicker$DatePicker$bottomSection = F2(
 								ctor: '::',
 								_0: _elm_lang$html$Html_Events$onClick(
 									function () {
-										var _p18 = model.selectedDate;
-										if (_p18.ctor === 'Just') {
-											return _abradley2$elm_datepicker$DatePicker$SubmitClicked(_p18._0);
+										var _p17 = model.selectedDate;
+										if (_p17.ctor === 'Just') {
+											return _abradley2$elm_datepicker$DatePicker$SubmitClicked(_p17._0);
 										} else {
 											return _abradley2$elm_datepicker$DatePicker$NoOp;
 										}
@@ -14923,8 +14922,8 @@ var _abradley2$elm_datepicker$DatePicker$view = F2(
 										_elm_lang$html$Html$div,
 										{ctor: '[]'},
 										function () {
-											var _p19 = model.selectionMode;
-											if (_p19.ctor === 'Calendar') {
+											var _p18 = model.selectionMode;
+											if (_p18.ctor === 'Calendar') {
 												return {
 													ctor: '::',
 													_0: A2(_abradley2$elm_datepicker$DatePicker$monthChangeSection, initializedModel, props),
@@ -14933,7 +14932,7 @@ var _abradley2$elm_datepicker$DatePicker$view = F2(
 														_0: A2(_abradley2$elm_datepicker$DatePicker$weekSection, initializedModel, props),
 														_1: {
 															ctor: '::',
-															_0: A2(_abradley2$elm_datepicker$DatePicker$daySection, initializedModel, props),
+															_0: A2(_abradley2$elm_datepicker$DatePicker$calendarBody, initializedModel, props),
 															_1: {
 																ctor: '::',
 																_0: footer,

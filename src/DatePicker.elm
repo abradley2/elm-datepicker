@@ -67,7 +67,8 @@ type SelectionMode
 
 
 type MonthChange
-    = Previous
+    = None
+    | Previous
     | Next
 
 
@@ -198,7 +199,7 @@ init id =
       , selectedDate = Nothing
       , previousSelectedDate = Nothing
       , selectionMode = Calendar
-      , monthChange = Next
+      , monthChange = None
       , yearList = []
       }
     , Task.perform GetToday Date.now
@@ -524,50 +525,48 @@ daySectionMonth model props =
         )
 
 
-daySection : InitializedModel -> Props -> Html Msg
-daySection model props =
+getMonthKey : Date -> String
+getMonthKey date =
+    toString (Tuple.first <| getMonthInfo (Date.month date))
+
+
+previousMonthBody : InitializedModel -> Props -> Maybe ( String, Html Msg )
+previousMonthBody model props =
+    Maybe.map
+        (\previousMonthMap ->
+            ( getMonthKey model.indexDate ++ "-previous"
+            , div
+                [ classList
+                    [ ( "edp-month-slider", True )
+                    , ( "edp-out-next", model.monthChange == Next )
+                    , ( "edp-out-previous", model.monthChange == Previous )
+                    ]
+                ]
+                [ daySectionMonth { model | currentMonthMap = previousMonthMap } props
+                ]
+            )
+        )
+        model.previousMonthMap
+
+
+calendarBody : InitializedModel -> Props -> Html Msg
+calendarBody model props =
     Keyed.node "div"
         [ class "edp-month-wrapper"
         ]
-        (case model.previousMonthMap of
-            Just previousMonthMap ->
-                let
-                    monthString =
-                        toString (Tuple.first <| getMonthInfo (Date.month model.indexDate))
-                in
-                    [ ( monthString ++ "-previous"
-                      , (div
-                            [ classList
-                                [ ( "edp-month-slider", True )
-                                , ( "edp-out-next", model.monthChange == Next )
-                                , ( "edp-out-previous", model.monthChange /= Next )
-                                ]
-                            ]
-                            [ daySectionMonth { model | currentMonthMap = previousMonthMap } props
-                            ]
-                        )
-                      )
-                    , ( monthString
-                      , div
-                            [ classList
-                                [ ( "edp-month-slider", True )
-                                , ( "edp-in-next", model.monthChange == Next )
-                                , ( "edp-in-previous", model.monthChange /= Next )
-                                ]
-                            ]
-                            [ daySectionMonth model props
-                            ]
-                      )
+        [ Maybe.withDefault ( "only", div [] [] ) (previousMonthBody model props)
+        , ( getMonthKey model.indexDate
+          , div
+                [ classList
+                    [ ( "edp-month-slider", True )
+                    , ( "edp-in-next", model.monthChange == Next )
+                    , ( "edp-in-previous", model.monthChange == Previous )
                     ]
-
-            Nothing ->
-                [ ( "key.only"
-                  , div [ class "edp-month-slider" ]
-                        [ daySectionMonth model props
-                        ]
-                  )
                 ]
-        )
+                [ daySectionMonth model props
+                ]
+          )
+        ]
 
 
 bottomSection : InitializedModel -> Props -> Html Msg
@@ -694,7 +693,7 @@ view model props =
                                 Calendar ->
                                     [ monthChangeSection initializedModel props
                                     , weekSection initializedModel props
-                                    , daySection initializedModel props
+                                    , calendarBody initializedModel props
                                     , footer
                                     ]
 

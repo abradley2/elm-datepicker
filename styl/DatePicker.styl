@@ -29,18 +29,6 @@ $disabled
         width 300px
         height 240px
 
-    @keyframes slideupprevious
-        from
-            transform translateY(0%)
-        to
-            transform translateY(-100%)
-
-    @keyframes slideupnext
-        from
-            transform translateY(100%)
-        to
-            transform translateY(0%)
-
     .edp-month-day-wrapper
         position relative
         height 48px
@@ -181,6 +169,18 @@ $disabled
         display flex
         justify-content center
         overflow auto
+
+@keyframes edp-slideupprevious
+    from
+        transform translateY(0%)
+    to
+        transform translateY(-100%)
+
+@keyframes edp-slideupnext
+    from
+        transform translateY(100%)
+    to
+        transform translateY(0%)
 
 @keyframes edp-slidenext {
     from {
