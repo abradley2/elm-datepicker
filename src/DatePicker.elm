@@ -389,7 +389,10 @@ headerSection displayDate model props =
             ]
             [ Maybe.withDefault
                 ( "previous", div [] [] )
-                (headerDayMonthDisplay True model.previousSelectedDate model)
+                (headerDayMonthDisplay True
+                    model.previousSelectedDate
+                    model
+                )
             , Maybe.withDefault
                 ( "current", div [] [] )
                 (headerDayMonthDisplay False
