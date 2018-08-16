@@ -9,7 +9,7 @@
   overflow: hidden;
 }
 .edp-container .edp-header-section {
-  background-color: #5a9789;
+  background-color: #60b5cd;
   padding: 16px 24px;
   color: rgba(255,255,255,0.8);
 }
@@ -107,11 +107,11 @@
   background-color: rgba(0,0,0,0.08);
 }
 .edp-container .edp-day-number.edp-day-number-today {
-  color: #5a9789;
+  color: #60b5cd;
   font-weight: bolder;
 }
 .edp-container .edp-day-number.edp-day-number-selected {
-  background-color: #5a9789;
+  background-color: #60b5cd;
   color: #fff;
 }
 .edp-container .edp-empty-column {
@@ -132,7 +132,7 @@
   padding-bottom: 16px;
 }
 .edp-container .edp-button {
-  color: #5a9789;
+  color: #60b5cd;
   border: none;
   outline: none;
   background-color: #fff;
@@ -155,7 +155,7 @@
   outline: none;
 }
 .edp-container .edp-year-button {
-  color: #5a9789;
+  color: #60b5cd;
   padding: 0px;
   width: 200px;
   transition: 0.3s;
