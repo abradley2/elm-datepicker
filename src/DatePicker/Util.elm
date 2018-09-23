@@ -139,7 +139,7 @@ buildMonthMap currentMap currentDay lastDay firstDate indexDate =
     in
     if lastDay /= currentDay then
         buildMonthMap newMap
-            currentDay
+            (currentDay + 1)
             lastDay
             firstDate
             indexDate
