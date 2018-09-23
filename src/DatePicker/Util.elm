@@ -1,38 +1,50 @@
-module DatePicker.Util exposing (..)
+module DatePicker.Util exposing
+    ( buildMonthMap
+    , getDayInfo
+    , getDayMonthText
+    , getDayNum
+    , getLastDayOfMonth
+    , getMonthInfo
+    , getMonthNumber
+    , getNextMonthNumber
+    , getPreviousMonthNumber
+    , isJust
+    , padMonthMap
+    , setDayOfMonth
+    )
 
 import Date exposing (..)
-import Date.Extra.Duration exposing (add, Duration, Duration(..))
-import Date.Extra.Create exposing (dateFromFields)
+import Time exposing (Month(..), Weekday(..))
 
 
-getDayInfo : Day -> ( String, Int )
+getDayInfo : Weekday -> ( String, Int )
 getDayInfo day =
     case day of
         Sun ->
-            ( "Sun", 1 )
+            ( "Sun", 7 )
 
         Mon ->
-            ( "Mon", 2 )
+            ( "Mon", 1 )
 
         Tue ->
-            ( "Tue", 3 )
+            ( "Tue", 2 )
 
         Wed ->
-            ( "Wed", 4 )
+            ( "Wed", 3 )
 
         Thu ->
-            ( "Thu", 5 )
+            ( "Thu", 4 )
 
         Fri ->
-            ( "Fri", 6 )
+            ( "Fri", 5 )
 
         Sat ->
-            ( "Sat", 7 )
+            ( "Sat", 6 )
 
 
 getDayNum : Date -> Int
 getDayNum date =
-    Tuple.second <| getDayInfo (Date.dayOfWeek date)
+    Tuple.second <| getDayInfo (weekday date)
 
 
 getMonthInfo : Month -> ( String, Int )
@@ -80,74 +92,72 @@ getMonthNumber month =
 
 
 getNextMonthNumber =
-    (getMonthNumber >> (+) 2)
+    getMonthNumber >> (+) 2
 
 
 getPreviousMonthNumber =
-    (getMonthNumber >> (\n -> n - 1))
+    getMonthNumber >> (\n -> n - 1)
 
 
 getLastDayOfMonth : Date -> Int -> Int
 getLastDayOfMonth date prevTry =
     let
         nextDate =
-            add Day 1 date
+            add Days 1 date
     in
-        if (Date.day nextDate) > prevTry then
-            getLastDayOfMonth nextDate (Date.day nextDate)
-        else
-            prevTry
+    if Date.day nextDate > prevTry then
+        getLastDayOfMonth nextDate (Date.day nextDate)
+
+    else
+        prevTry
+
+
+placeholder =
+    fromCalendarDate 1970 Jan 1
 
 
 padMonthMap currentIndex stopIndex monthMap =
     if currentIndex == stopIndex then
         monthMap
+
     else
-        padMonthMap (currentIndex + 1) stopIndex (( 0, Date.fromTime 0 ) :: monthMap)
+        padMonthMap (currentIndex + 1) stopIndex (( 0, placeholder ) :: monthMap)
 
 
 buildMonthMap : List ( Int, Date ) -> Int -> Int -> Date -> Date -> List ( Int, Date )
 buildMonthMap currentMap currentDay lastDay firstDate indexDate =
     let
         newMap =
-            (currentMap
+            currentMap
                 ++ [ ( currentDay
-                     , dateFromFields
+                     , fromCalendarDate
                         (Date.year indexDate)
                         (Date.month indexDate)
-                        (currentDay)
-                        0
-                        0
-                        0
-                        0
+                        currentDay
                      )
                    ]
-            )
     in
-        if lastDay /= currentDay then
-            buildMonthMap newMap
-                (currentDay + 1)
-                lastDay
-                firstDate
-                indexDate
-        else
-            let
-                padSize =
-                    (getDayNum firstDate) - 1
-            in
-                padMonthMap 0 padSize newMap
+    if lastDay /= currentDay then
+        buildMonthMap newMap
+            currentDay
+            lastDay
+            firstDate
+            indexDate
+
+    else
+        let
+            padSize =
+                weekdayNumber firstDate
+        in
+        padMonthMap 0 padSize newMap
 
 
 setDayOfMonth : Date -> Int -> Date
 setDayOfMonth date num =
-    dateFromFields
+    fromCalendarDate
         (Date.year date)
         (Date.month date)
         num
-        0
-        0
-        0
-        0
 
 
 getDayMonthText date =
@@ -156,10 +166,10 @@ getDayMonthText date =
             getMonthInfo <| Date.month date
 
         ( dayShort, dayInt ) =
-            getDayInfo <| Date.dayOfWeek date
+            getDayInfo <| weekday date
     in
-        dayShort ++ ", " ++ (String.slice 0 3 monthFull) ++ " " ++ (toString <| Date.day date)
+    dayShort ++ ", " ++ String.slice 0 3 monthFull ++ " " ++ (String.fromInt <| Date.day date)
 
 
 isJust =
-    (Maybe.map (\_ -> True) >> Maybe.withDefault False)
+    Maybe.map (\_ -> True) >> Maybe.withDefault False

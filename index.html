@@ -19,7 +19,10 @@
         <div id='app'></div>
         <script src="demo.js"></script>
         <script>
-        const app = window.Elm.Demo.embed(document.getElementById('app'))
+        const app = window.Elm.Demo.init({
+            node: document.getElementById('app'),
+            flags: {}
+        })
         </script>
     </body>
 </html>

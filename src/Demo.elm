@@ -1,11 +1,11 @@
-module Demo exposing (..)
+module Demo exposing (Model, Msg(..), init, main, subscriptions, update, view)
 
-import Html
+import Browser
+import Date exposing (..)
+import DatePicker exposing (Msg(..))
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Date exposing (..)
-import DatePicker exposing (Msg(..))
 
 
 type alias Model =
@@ -19,17 +19,21 @@ type Msg
     | DatePickerMsg DatePicker.Msg
 
 
-init : ( Model, Cmd Msg )
-init =
+type alias Flags =
+    {}
+
+
+init : Flags -> ( Model, Cmd Msg )
+init flags =
     let
         ( datePickerData, datePickerCmd ) =
             DatePicker.init "my-datepicker"
     in
-        ( { datePickerData = datePickerData
-          , selectedDate = Nothing
-          }
-        , Cmd.map DatePickerMsg datePickerCmd
-        )
+    ( { datePickerData = datePickerData
+      , selectedDate = Nothing
+      }
+    , Cmd.map DatePickerMsg datePickerCmd
+    )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -41,24 +45,22 @@ update msg model =
         DatePickerMsg datePickerMsg ->
             DatePicker.update datePickerMsg model.datePickerData
                 -- set the data returned from datePickerUpdate. Don't discard the command!
-                |>
-                    (\( data, cmd ) ->
+                |> (\( data, cmd ) ->
                         ( { model | datePickerData = data }
                         , Cmd.map DatePickerMsg cmd
                         )
-                    )
+                   )
                 -- and now we can respond to any internal messages we want
-                |>
-                    (\( model, cmd ) ->
+                |> (\( newModel, cmd ) ->
                         case datePickerMsg of
                             SubmitClicked currentSelectedDate ->
-                                ( { model | selectedDate = Just currentSelectedDate }
+                                ( { newModel | selectedDate = Just currentSelectedDate }
                                 , cmd
                                 )
 
                             _ ->
-                                ( model, cmd )
-                    )
+                                ( newModel, cmd )
+                   )
 
 
 subscriptions : Model -> Sub Msg
@@ -69,16 +71,12 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
     div
-        [ style
-            [ ( "display", "flex" )
-            , ( "justify-content", "center" )
-            ]
+        [ style "display" "flex"
+        , style "justify-content" "center"
         ]
         [ div
-            [ style
-                [ ( "margin-top", "40px" )
-                , ( "box-shadow", "0 1px 3px rgba(0, 0, 0, 0.24)" )
-                ]
+            [ style "margin-top" "40px"
+            , style "box-shadow" "0 1px 3px rgba(0, 0, 0, 0.24)"
             ]
             [ DatePicker.view
                 model.datePickerData
@@ -88,9 +86,9 @@ view model =
         ]
 
 
-main : Program Never Model Msg
+main : Program Flags Model Msg
 main =
-    Html.program
+    Browser.element
         { init = init
         , update = update
         , view = view

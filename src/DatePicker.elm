@@ -1,16 +1,9 @@
-module DatePicker
-    exposing
-        ( view
-        , init
-        , defaultProps
-        , update
-        , SelectionMode
-        , Props
-        , Model
-        , Msg
-        , Msg(..)
-        , setIndexDate
-        )
+module DatePicker exposing
+    ( Msg(..), init, update, Model
+    , view, Props, defaultProps
+    , setIndexDate
+    , SelectionMode
+    )
 
 {-| This module provides a material-style date picker for Elm.
 [You can check out the demo here.](http://abradley2.github.io/elm-datepicker/)
@@ -18,41 +11,43 @@ Since this date picker
 uses material-icons, you will need to have these included on your page.
 Also include the `DatePicker.css` found in the root of this directory.
 
-
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="DatePicker.css" />
-
 
 To alter the color theme edit `./styl/Variables.styl`, then run
 `npm install && npm run build-styles`.
 
 
 # Tea / Initialization
+
 @docs Msg, init, update, Model
 
+
 # Rendering and Settings
+
 @docs view, Props, defaultProps
 
+
 # Helpers
+
 @docs setIndexDate
 
+
 # Types
+
 @docs SelectionMode
+
 -}
 
-import Process
-import Task
-import Dict
-import Dom
-import Dom.Scroll exposing (toY)
 import Date exposing (..)
-import Date.Extra.Duration exposing (Duration, Duration(..), add)
-import Date.Extra.Create exposing (dateFromFields)
+import DatePicker.Util exposing (..)
+import Dict
 import Html exposing (..)
-import Html.Keyed as Keyed
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import DatePicker.Util exposing (..)
+import Html.Keyed as Keyed
+import Process
+import Task
 
 
 {-| Represents the current mode the picker is set to
@@ -60,6 +55,7 @@ import DatePicker.Util exposing (..)
     type SelectionMode
         = Calendar
         | YearPicker
+
 -}
 type SelectionMode
     = Calendar
@@ -80,6 +76,7 @@ it recognizes this type.
     type Msg
         = FireZeMissiles
         | DatePickerMsg DatePicker.Msg
+
 -}
 type Msg
     = NoOp
@@ -102,15 +99,15 @@ type Msg
         }
     }
 
-
 This is mostly an opaque type you don't have to worry about, though there are some important fields you will
 want to use:
 
-* `today` is the default "selected" day of the picker before the user has actually clicked to "select" a day.
-This is needed so the head display isn't empty before the user has selected anything, without forcing there be a default selected date of "today".
-* `indexDate` is a date used to track which month the calendar is currently showing. Do not set this directly. Use the `setIndexDate` helper
-* `selectedDate` is the last date the user clicked on in the calendar that was selectable
-* `selectionMode` determines whether the user sees the `Calendar` or the `YearPicker`
+  - `today` is the default "selected" day of the picker before the user has actually clicked to "select" a day.
+    This is needed so the head display isn't empty before the user has selected anything, without forcing there be a default selected date of "today".
+  - `indexDate` is a date used to track which month the calendar is currently showing. Do not set this directly. Use the `setIndexDate` helper
+  - `selectedDate` is the last date the user clicked on in the calendar that was selectable
+  - `selectionMode` determines whether the user sees the `Calendar` or the `YearPicker`
+
 -}
 type alias Model =
     { id : String
@@ -120,9 +117,7 @@ type alias Model =
     , previousMonthMap : Maybe (List ( Int, Date ))
     , selectedDate : Maybe Date
     , previousSelectedDate : Maybe Date
-    , selectionMode : SelectionMode
     , monthChange : MonthChange
-    , yearList : List Int
     }
 
 
@@ -135,8 +130,6 @@ type alias InitializedModel =
     , selectedDate : Maybe Date
     , previousSelectedDate : Maybe Date
     , monthChange : MonthChange
-    , yearList : List Int
-    , selectionMode : SelectionMode
     }
 
 
@@ -154,21 +147,17 @@ setIndexDate model indexDate =
             buildMonthMap
                 []
                 1
-                (lastDayOfMonth)
+                lastDayOfMonth
                 (setDayOfMonth indexDate 1)
                 indexDate
-
-        yearList =
-            List.range (Date.year indexDate - 120) (Date.year indexDate + 120)
     in
-        { model
-            | indexDate =
-                -- this will set it to beginning of day
-                Just (setDayOfMonth indexDate (Date.day indexDate))
-            , currentMonthMap = Just monthMap
-            , previousMonthMap = model.currentMonthMap
-            , yearList = yearList
-        }
+    { model
+        | indexDate =
+            -- this will set it to beginning of day
+            Just (setDayOfMonth indexDate (Date.day indexDate))
+        , currentMonthMap = Just monthMap
+        , previousMonthMap = model.currentMonthMap
+    }
 
 
 {-| `DatePicker.init` returns an initialized record of `DatePicker.Model`. Do not throw out the returned command!
@@ -177,17 +166,18 @@ The string passed as the first argument must be a unique `id` for the date picke
 
     import DatePicker
 
-    init : (Model, Cmd Msg)
+    init : ( Model, Cmd Msg )
     init =
         let
-            (datePickerData, datePickerInitCmd) =
+            ( datePickerData, datePickerInitCmd ) =
                 DatePicker.init "my-datepicker-id"
         in
-            ( { datePickerData = datePickerData
-              , selectedDate = Nothing
-              }
-            , Cmd.map DatePickerMsg datePickerInitCmd
-            )
+        ( { datePickerData = datePickerData
+          , selectedDate = Nothing
+          }
+        , Cmd.map DatePickerMsg datePickerInitCmd
+        )
+
 -}
 init : String -> ( Model, Cmd Msg )
 init id =
@@ -198,17 +188,14 @@ init id =
       , previousMonthMap = Nothing
       , selectedDate = Nothing
       , previousSelectedDate = Nothing
-      , selectionMode = Calendar
       , monthChange = None
-      , yearList = []
       }
-    , Task.perform GetToday Date.now
+    , Task.perform GetToday Date.today
     )
 
 
 {-| `DatePicker.update` consumes the message you've mapped and a `DatePicker.Model` record to output `( DatePicker.Model, Cmd DatePicker.Msg)`.
 You will need to alter your update function to handle any `DatePicker.Msg` that flows through.
-
 
     import DatePicker exposing (Msg(SelectDate))
     ...
@@ -231,6 +218,7 @@ You will need to alter your update function to handle any `DatePicker.Msg` that 
 
             DatePickerMsg datePickerMsg ->
                 handleDatePickerMsg model datePickerMsg
+
 -}
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
@@ -251,60 +239,32 @@ update msg model =
                 newModel =
                     setIndexDate model newIndexDate
             in
-                ( { newModel
-                    | monthChange = Next
-                  }
-                , Cmd.none
-                )
-
-        SetYear indexDate newYear ->
-            let
-                newModel =
-                    setIndexDate model (dateFromFields newYear (Date.month indexDate) 1 0 0 0 0)
-            in
-                ( { newModel
-                    | selectionMode = Calendar
-                    , previousMonthMap = Nothing
-                  }
-                , Cmd.none
-                )
+            ( { newModel
+                | monthChange = Next
+              }
+            , Cmd.none
+            )
 
         PreviousMonth newIndexDate ->
             let
                 newModel =
                     setIndexDate model newIndexDate
             in
-                ( { newModel
-                    | monthChange = Previous
-                  }
-                , Cmd.none
-                )
+            ( { newModel
+                | monthChange = Previous
+              }
+            , Cmd.none
+            )
 
         GetToday today ->
             let
                 updatedModel =
                     setIndexDate model today
             in
-                ( { updatedModel
-                    | today = Just (setDayOfMonth today (Date.day today))
-                  }
-                , Cmd.none
-                )
-
-        SetSelectionMode selectionMode ->
-            ( { model
-                | selectionMode = selectionMode
-                , previousMonthMap =
-                    Nothing
-                    -- so we don't animate to next month when this div remounts
+            ( { updatedModel
+                | today = Just (setDayOfMonth today (Date.day today))
               }
-            , case selectionMode of
-                Calendar ->
-                    Cmd.none
-
-                YearPicker ->
-                    toY ("edp-year-picker-scroll-" ++ model.id) (List.length model.yearList |> toFloat |> \l -> l * 40 / 2 - 120)
-                        |> Task.attempt (always NoOp)
+            , Cmd.none
             )
 
         _ ->
@@ -332,6 +292,7 @@ By default, nothing is restricted.
         , canSelectDate = \date -> True
         , hideFooter = False
         }
+
 -}
 defaultProps : Props
 defaultProps =
@@ -343,7 +304,7 @@ defaultProps =
 
 
 displayYear =
-    (Date.year >> toString >> text)
+    Date.year >> String.fromInt >> text
 
 
 headerYearDisplay : Date -> InitializedModel -> Props -> Html Msg
@@ -351,9 +312,7 @@ headerYearDisplay displayDate model props =
     div
         [ classList
             [ ( "edp-header-year", True )
-            , ( "edp-header-active", model.selectionMode == YearPicker )
             ]
-        , onClick (SetSelectionMode YearPicker)
         ]
         [ displayYear displayDate ]
 
@@ -366,10 +325,9 @@ headerDayMonthDisplay isPreviousDate date model =
             , div
                 [ classList
                     [ ( "edp-header-month-day", True )
-                    , ( "edp-header-active", model.selectionMode == Calendar )
+                    , ( "edp-header-active", True )
                     , ( "edp-month-day-previous", isPreviousDate )
                     ]
-                , onClick (SetSelectionMode Calendar)
                 ]
                 [ text (getDayMonthText justDate)
                 ]
@@ -398,6 +356,7 @@ headerSection displayDate model props =
                 (headerDayMonthDisplay False
                     (if isJust model.selectedDate then
                         model.selectedDate
+
                      else
                         Just model.today
                     )
@@ -422,49 +381,51 @@ monthChangeSection model props =
         canSelectPrevious =
             props.canSelectMonth year <| getPreviousMonthNumber month
     in
-        div
-            [ class "edp-month-change-section edp-body-section"
+    div
+        [ class "edp-month-change-section edp-body-section"
+        ]
+        [ div
+            [ onClick <|
+                if canSelectPrevious then
+                    PreviousMonth (add Months -1 model.indexDate)
+
+                else
+                    NoOp
             ]
-            [ div
-                [ onClick <|
-                    if canSelectPrevious then
-                        (PreviousMonth (add Month -1 model.indexDate))
-                    else
-                        NoOp
-                ]
-                [ i
-                    [ classList
-                        [ ( "material-icons arrow-icon", True )
-                        , ( "edp-disabled", canSelectPrevious == False )
-                        ]
+            [ i
+                [ classList
+                    [ ( "material-icons arrow-icon", True )
+                    , ( "edp-disabled", canSelectPrevious == False )
                     ]
-                    [ text "keyboard_arrow_left" ]
                 ]
-            , div []
-                [ text
-                    (let
-                        ( monthFull, monthInt ) =
-                            getMonthInfo (Date.month model.indexDate)
-                     in
-                        monthFull ++ " " ++ (toString <| Date.year model.indexDate)
-                    )
-                ]
-            , div
-                [ onClick <|
-                    if canSelectNext then
-                        (NextMonth (add Month 1 model.indexDate))
-                    else
-                        NoOp
-                ]
-                [ i
-                    [ classList
-                        [ ( "material-icons arrow-icon", True )
-                        , ( "edp-disabled", canSelectPrevious == False )
-                        ]
-                    ]
-                    [ text "keyboard_arrow_right" ]
-                ]
+                [ text "keyboard_arrow_left" ]
             ]
+        , div []
+            [ text
+                (let
+                    ( monthFull, monthInt ) =
+                        getMonthInfo (Date.month model.indexDate)
+                 in
+                 monthFull ++ " " ++ (String.fromInt <| Date.year model.indexDate)
+                )
+            ]
+        , div
+            [ onClick <|
+                if canSelectNext then
+                    NextMonth (add Months 1 model.indexDate)
+
+                else
+                    NoOp
+            ]
+            [ i
+                [ classList
+                    [ ( "material-icons arrow-icon", True )
+                    , ( "edp-disabled", canSelectPrevious == False )
+                    ]
+                ]
+                [ text "keyboard_arrow_right" ]
+            ]
+        ]
 
 
 weekSection : InitializedModel -> Props -> Html Msg
@@ -487,40 +448,41 @@ daySectionMonth model props =
                     isSelected =
                         case model.selectedDate of
                             Just selected ->
-                                Date.toTime selected == Date.toTime date
+                                Date.toRataDie selected == Date.toRataDie date
 
                             Nothing ->
                                 False
 
                     isToday =
-                        Date.toTime model.today == Date.toTime date
+                        Date.toRataDie model.today == Date.toRataDie date
 
                     canSelect =
                         props.canSelectDate date
                 in
-                    div
-                        [ classList
-                            [ ( "edp-column edp-day-number", True )
-                            , ( "edp-empty-column", dayNum == 0 )
-                            , ( "edp-disabled-column", canSelect == False )
-                            , ( "edp-day-number-selected", isSelected )
-                            , ( "edp-day-number-today", isToday )
-                            ]
-                        , onClick
-                            (case model.selectedDate of
-                                Just previousSelected ->
-                                    if Date.toTime previousSelected == Date.toTime date then
-                                        NoOp
-                                    else
-                                        DateSelected date previousSelected
+                div
+                    [ classList
+                        [ ( "edp-column edp-day-number", True )
+                        , ( "edp-empty-column", dayNum == 0 )
+                        , ( "edp-disabled-column", canSelect == False )
+                        , ( "edp-day-number-selected", isSelected )
+                        , ( "edp-day-number-today", isToday )
+                        ]
+                    , onClick
+                        (case model.selectedDate of
+                            Just previousSelected ->
+                                if Date.toRataDie previousSelected == Date.toRataDie date then
+                                    NoOp
 
-                                Nothing ->
-                                    DateSelected date model.today
-                            )
-                        ]
-                        [ text
-                            (toString dayNum)
-                        ]
+                                else
+                                    DateSelected date previousSelected
+
+                            Nothing ->
+                                DateSelected date model.today
+                        )
+                    ]
+                    [ text
+                        (String.fromInt dayNum)
+                    ]
             )
             model.currentMonthMap
         )
@@ -528,7 +490,7 @@ daySectionMonth model props =
 
 getMonthKey : Date -> String
 getMonthKey date =
-    toString (Tuple.first <| getMonthInfo (Date.month date))
+    Tuple.first <| getMonthInfo (Date.month date)
 
 
 previousMonthBody : InitializedModel -> Props -> Maybe ( String, Html Msg )
@@ -576,78 +538,31 @@ bottomSection model props =
         disableOk =
             model.selectedDate == Nothing
     in
-        div [ class "edp-body-section edp-bottom-section" ]
-            [ button
-                [ onClick CancelClicked
-                , class "edp-button"
-                ]
-                [ text "CANCEL" ]
-            , button
-                [ classList
-                    [ ( "edp-button", True )
-                    , ( "edp-disabled", model.selectedDate == Nothing )
-                    ]
-                , onClick
-                    (case model.selectedDate of
-                        Just date ->
-                            SubmitClicked date
-
-                        Nothing ->
-                            NoOp
-                    )
-                ]
-                [ text "OK" ]
+    div [ class "edp-body-section edp-bottom-section" ]
+        [ button
+            [ onClick CancelClicked
+            , class "edp-button"
             ]
-
-
-yearPickerSection : InitializedModel -> Props -> Html Msg
-yearPickerSection model props =
-    div
-        [ classList
-            [ ( "edp-year-picker", True )
-            ]
-        , id <| "edp-year-picker-scroll-" ++ model.id
-        ]
-        [ let
-            listHeight =
-                toString <| (List.length model.yearList) * 40
-
-            offset =
-                toString <| (List.length model.yearList) * 40 // 2 - 40
-
-            selectedYear =
-                Date.year <| Maybe.withDefault model.today model.selectedDate
-          in
-            div
-                [ classList
-                    [ ( "edp-year-picker-body", True )
-                    ]
-                , style
-                    [ ( "height", listHeight ++ "px" )
-                    ]
+            [ text "CANCEL" ]
+        , button
+            [ classList
+                [ ( "edp-button", True )
+                , ( "edp-disabled", model.selectedDate == Nothing )
                 ]
-                (List.map
-                    (\year ->
-                        div
-                            []
-                            [ button
-                                [ classList
-                                    [ ( "edp-button", True )
-                                    , ( "edp-year-button", True )
-                                    , ( "edp-year-button-selected", year == selectedYear )
-                                    ]
-                                , onClick (SetYear model.indexDate year)
-                                ]
-                                [ text (toString year) ]
-                            ]
-                    )
-                    model.yearList
+            , onClick
+                (case model.selectedDate of
+                    Just date ->
+                        SubmitClicked date
+
+                    Nothing ->
+                        NoOp
                 )
+            ]
+            [ text "OK" ]
         ]
 
 
-{-|
-The main view for the date picker. Use `Html.map` so the returned type doesn't conflict with
+{-| The main view for the date picker. Use `Html.map` so the returned type doesn't conflict with
 your view's type.
 
     import DatePicker
@@ -678,35 +593,26 @@ view model props =
                         , currentMonthMap = currentMonthMap
                         , previousMonthMap = model.previousMonthMap
                         , monthChange = model.monthChange
-                        , yearList = model.yearList
-                        , selectionMode = model.selectionMode
                         }
 
                     footer =
                         if props.hideFooter then
                             div [] []
+
                         else
                             bottomSection initializedModel props
                 in
-                    div
-                        [ class "edp-container"
+                div
+                    [ class "edp-container"
+                    ]
+                    [ headerSection displayDate initializedModel props
+                    , div []
+                        [ monthChangeSection initializedModel props
+                        , weekSection initializedModel props
+                        , calendarBody initializedModel props
+                        , footer
                         ]
-                        [ headerSection displayDate initializedModel props
-                        , div []
-                            (case model.selectionMode of
-                                Calendar ->
-                                    [ monthChangeSection initializedModel props
-                                    , weekSection initializedModel props
-                                    , calendarBody initializedModel props
-                                    , footer
-                                    ]
-
-                                YearPicker ->
-                                    [ yearPickerSection initializedModel props
-                                    , footer
-                                    ]
-                            )
-                        ]
+                    ]
             )
             model.today
             model.indexDate
