@@ -39,6 +39,7 @@ To alter the color theme edit `./styl/Variables.styl`, then run
 
 -}
 
+import Browser.Dom as Dom
 import Date exposing (..)
 import DatePicker.Util exposing (..)
 import Dict
@@ -82,7 +83,6 @@ type Msg
     = NoOp
     | DateSelected Date Date
     | GetToday Date
-    | SetYear Date Int
     | PreviousMonth Date
     | NextMonth Date
     | SubmitClicked Date
@@ -118,6 +118,8 @@ type alias Model =
     , selectedDate : Maybe Date
     , previousSelectedDate : Maybe Date
     , monthChange : MonthChange
+    , selectionMode : SelectionMode
+    , yearList : Maybe (List Int)
     }
 
 
@@ -130,6 +132,8 @@ type alias InitializedModel =
     , selectedDate : Maybe Date
     , previousSelectedDate : Maybe Date
     , monthChange : MonthChange
+    , selectionMode : SelectionMode
+    , yearList : List Int
     }
 
 
@@ -189,6 +193,8 @@ init id =
       , selectedDate = Nothing
       , previousSelectedDate = Nothing
       , monthChange = None
+      , selectionMode = Calendar
+      , yearList = Nothing
       }
     , Task.perform GetToday Date.today
     )
@@ -263,9 +269,35 @@ update msg model =
             in
             ( { updatedModel
                 | today = Just (setDayOfMonth today (Date.day today))
+                , yearList = Just (defaultedYearList model.yearList today)
               }
             , Cmd.none
             )
+
+        SetSelectionMode mode ->
+            case ( model.today, model.yearList ) of
+                ( Just today, Just yearList ) ->
+                    let
+                        workingDate =
+                            Maybe.withDefault today model.selectedDate
+
+                        scrollId =
+                            "edp-year-picker-" ++ model.id
+
+                        selectedYearIndex =
+                            List.partition (\year -> year <= Date.year workingDate) yearList
+                                |> Tuple.first
+                                |> List.length
+
+                        yOffset =
+                            (toFloat selectedYearIndex * 40) - (4 * 40)
+                    in
+                    ( { model | selectionMode = mode }
+                    , Task.attempt (\_ -> NoOp) (Dom.setViewportOf scrollId 0 yOffset)
+                    )
+
+                ( _, _ ) ->
+                    ( model, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
@@ -280,6 +312,16 @@ type alias Props =
     , canSelectDate : Date -> Bool
     , hideFooter : Bool
     }
+
+
+defaultedYearList : Maybe (List Int) -> Date -> List Int
+defaultedYearList yearList indexDate =
+    case yearList of
+        Just list ->
+            list
+
+        Nothing ->
+            List.range (Date.year indexDate - 120) (Date.year indexDate + 120)
 
 
 {-| Use the default props if you don't want to support any sort of configuration.
@@ -313,6 +355,7 @@ headerYearDisplay displayDate model props =
         [ classList
             [ ( "edp-header-year", True )
             ]
+        , onClick <| SetSelectionMode YearPicker
         ]
         [ displayYear displayDate ]
 
@@ -328,6 +371,7 @@ headerDayMonthDisplay isPreviousDate date model =
                     , ( "edp-header-active", True )
                     , ( "edp-month-day-previous", isPreviousDate )
                     ]
+                , onClick <| SetSelectionMode Calendar
                 ]
                 [ text (getDayMonthText justDate)
                 ]
@@ -562,6 +606,34 @@ bottomSection model props =
         ]
 
 
+yearSection : InitializedModel -> Html Msg
+yearSection model =
+    let
+        workingDate =
+            Maybe.withDefault model.today model.selectedDate
+
+        applyYear dt year =
+            Date.fromCalendarDate
+                year
+                (Date.month dt)
+                (Date.day dt)
+
+        viewYear year =
+            div []
+                [ button
+                    [ classList
+                        [ ( "edp-button", True )
+                        , ( "edp-year-button", True )
+                        , ( "edp-year-button-selected", year == Date.year workingDate )
+                        ]
+                    , onClick (DateSelected (applyYear workingDate year) workingDate)
+                    ]
+                    [ text (String.fromInt year) ]
+                ]
+    in
+    div [ id <| "edp-year-picker-" ++ model.id, class "edp-year-picker" ] [ div [ class "edp-year-picker-body" ] (List.map viewYear model.yearList) ]
+
+
 {-| The main view for the date picker. Use `Html.map` so the returned type doesn't conflict with
 your view's type.
 
@@ -584,6 +656,9 @@ view model props =
                     displayDate =
                         Maybe.withDefault today model.selectedDate
 
+                    yearList =
+                        defaultedYearList model.yearList indexDate
+
                     initializedModel =
                         { id = model.id
                         , today = today
@@ -593,6 +668,8 @@ view model props =
                         , currentMonthMap = currentMonthMap
                         , previousMonthMap = model.previousMonthMap
                         , monthChange = model.monthChange
+                        , selectionMode = model.selectionMode
+                        , yearList = yearList
                         }
 
                     footer =
@@ -601,17 +678,28 @@ view model props =
 
                         else
                             bottomSection initializedModel props
+
+                    mainSection =
+                        case initializedModel.selectionMode of
+                            Calendar ->
+                                div []
+                                    [ monthChangeSection initializedModel props
+                                    , weekSection initializedModel props
+                                    , calendarBody initializedModel props
+                                    , footer
+                                    ]
+
+                            YearPicker ->
+                                div []
+                                    [ yearSection initializedModel
+                                    , footer
+                                    ]
                 in
                 div
                     [ class "edp-container"
                     ]
                     [ headerSection displayDate initializedModel props
-                    , div []
-                        [ monthChangeSection initializedModel props
-                        , weekSection initializedModel props
-                        , calendarBody initializedModel props
-                        , footer
-                        ]
+                    , mainSection
                     ]
             )
             model.today
