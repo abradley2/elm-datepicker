@@ -233,7 +233,11 @@ update msg model =
             ( model, Cmd.none )
 
         DateSelected date previousDate ->
-            ( { model
+            let
+                newModel =
+                    setIndexDate model date
+            in
+            ( { newModel
                 | selectedDate = Just date
                 , previousSelectedDate = Just previousDate
               }
@@ -275,8 +279,8 @@ update msg model =
             )
 
         SetSelectionMode mode ->
-            case ( model.today, model.yearList ) of
-                ( Just today, Just yearList ) ->
+            case ( mode, model.today, model.yearList ) of
+                ( YearPicker, Just today, Just yearList ) ->
                     let
                         workingDate =
                             Maybe.withDefault today model.selectedDate
@@ -296,7 +300,10 @@ update msg model =
                     , Task.attempt (\_ -> NoOp) (Dom.setViewportOf scrollId 0 yOffset)
                     )
 
-                ( _, _ ) ->
+                ( Calendar, _, _ ) ->
+                    ( { model | selectionMode = mode, monthChange = Next }, Cmd.none )
+
+                ( _, _, _ ) ->
                     ( model, Cmd.none )
 
         _ ->
@@ -351,11 +358,20 @@ displayYear =
 
 headerYearDisplay : Date -> InitializedModel -> Props -> Html Msg
 headerYearDisplay displayDate model props =
+    let
+        msgSetMode =
+            case model.selectionMode of
+                YearPicker ->
+                    SetSelectionMode Calendar
+
+                Calendar ->
+                    SetSelectionMode YearPicker
+    in
     div
         [ classList
             [ ( "edp-header-year", True )
             ]
-        , onClick <| SetSelectionMode YearPicker
+        , onClick msgSetMode
         ]
         [ displayYear displayDate ]
 

@@ -10245,9 +10245,10 @@ var abradley2$elm_datepicker$DatePicker$update = F2(
 			case 'DateSelected':
 				var date = msg.a;
 				var previousDate = msg.b;
+				var newModel = A2(abradley2$elm_datepicker$DatePicker$setIndexDate, model, date);
 				return _Utils_Tuple2(
 					_Utils_update(
-						model,
+						newModel,
 						{
 							previousSelectedDate: elm$core$Maybe$Just(previousDate),
 							selectedDate: elm$core$Maybe$Just(date)
@@ -10287,34 +10288,44 @@ var abradley2$elm_datepicker$DatePicker$update = F2(
 					elm$core$Platform$Cmd$none);
 			case 'SetSelectionMode':
 				var mode = msg.a;
-				var _n1 = _Utils_Tuple2(model.today, model.yearList);
-				if ((_n1.a.$ === 'Just') && (_n1.b.$ === 'Just')) {
-					var today = _n1.a.a;
-					var yearList = _n1.b.a;
-					var workingDate = A2(elm$core$Maybe$withDefault, today, model.selectedDate);
-					var selectedYearIndex = elm$core$List$length(
-						A2(
-							elm$core$List$partition,
-							function (year) {
-								return _Utils_cmp(
-									year,
-									justinmimbs$date$Date$year(workingDate)) < 1;
-							},
-							yearList).a);
-					var yOffset = (selectedYearIndex * 40) - (4 * 40);
-					var scrollId = 'edp-year-picker-' + model.id;
+				var _n1 = _Utils_Tuple3(mode, model.today, model.yearList);
+				if (_n1.a.$ === 'YearPicker') {
+					if ((_n1.b.$ === 'Just') && (_n1.c.$ === 'Just')) {
+						var _n2 = _n1.a;
+						var today = _n1.b.a;
+						var yearList = _n1.c.a;
+						var workingDate = A2(elm$core$Maybe$withDefault, today, model.selectedDate);
+						var selectedYearIndex = elm$core$List$length(
+							A2(
+								elm$core$List$partition,
+								function (year) {
+									return _Utils_cmp(
+										year,
+										justinmimbs$date$Date$year(workingDate)) < 1;
+								},
+								yearList).a);
+						var yOffset = (selectedYearIndex * 40) - (4 * 40);
+						var scrollId = 'edp-year-picker-' + model.id;
+						return _Utils_Tuple2(
+							_Utils_update(
+								model,
+								{selectionMode: mode}),
+							A2(
+								elm$core$Task$attempt,
+								function (_n3) {
+									return abradley2$elm_datepicker$DatePicker$NoOp;
+								},
+								A3(elm$browser$Browser$Dom$setViewportOf, scrollId, 0, yOffset)));
+					} else {
+						return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+					}
+				} else {
+					var _n4 = _n1.a;
 					return _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{selectionMode: mode}),
-						A2(
-							elm$core$Task$attempt,
-							function (_n2) {
-								return abradley2$elm_datepicker$DatePicker$NoOp;
-							},
-							A3(elm$browser$Browser$Dom$setViewportOf, scrollId, 0, yOffset)));
-				} else {
-					return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
+							{monthChange: abradley2$elm_datepicker$DatePicker$Next, selectionMode: mode}),
+						elm$core$Platform$Cmd$none);
 				}
 			default:
 				return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
@@ -10732,6 +10743,14 @@ var abradley2$elm_datepicker$DatePicker$displayYear = A2(
 	A2(elm$core$Basics$composeR, elm$core$String$fromInt, elm$html$Html$text));
 var abradley2$elm_datepicker$DatePicker$headerYearDisplay = F3(
 	function (displayDate, model, props) {
+		var msgSetMode = function () {
+			var _n0 = model.selectionMode;
+			if (_n0.$ === 'YearPicker') {
+				return abradley2$elm_datepicker$DatePicker$SetSelectionMode(abradley2$elm_datepicker$DatePicker$Calendar);
+			} else {
+				return abradley2$elm_datepicker$DatePicker$SetSelectionMode(abradley2$elm_datepicker$DatePicker$YearPicker);
+			}
+		}();
 		return A2(
 			elm$html$Html$div,
 			_List_fromArray(
@@ -10741,8 +10760,7 @@ var abradley2$elm_datepicker$DatePicker$headerYearDisplay = F3(
 						[
 							_Utils_Tuple2('edp-header-year', true)
 						])),
-					elm$html$Html$Events$onClick(
-					abradley2$elm_datepicker$DatePicker$SetSelectionMode(abradley2$elm_datepicker$DatePicker$YearPicker))
+					elm$html$Html$Events$onClick(msgSetMode)
 				]),
 			_List_fromArray(
 				[
