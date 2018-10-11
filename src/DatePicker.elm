@@ -650,14 +650,11 @@ your view's type.
 view : Model -> Props -> Html Msg
 view model props =
     Maybe.withDefault (div [ class "edp-container" ] []) <|
-        Maybe.map3
-            (\today indexDate currentMonthMap ->
+        Maybe.map4
+            (\today indexDate currentMonthMap yearList ->
                 let
                     displayDate =
                         Maybe.withDefault today model.selectedDate
-
-                    yearList =
-                        defaultedYearList model.yearList indexDate
 
                     initializedModel =
                         { id = model.id
@@ -705,3 +702,4 @@ view model props =
             model.today
             model.indexDate
             model.currentMonthMap
+            model.yearList

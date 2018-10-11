@@ -10991,8 +10991,8 @@ var abradley2$elm_datepicker$DatePicker$yearSection = function (model) {
 				A2(elm$core$List$map, viewYear, model.yearList))
 			]));
 };
-var elm$core$Maybe$map3 = F4(
-	function (func, ma, mb, mc) {
+var elm$core$Maybe$map4 = F5(
+	function (func, ma, mb, mc, md) {
 		if (ma.$ === 'Nothing') {
 			return elm$core$Maybe$Nothing;
 		} else {
@@ -11005,8 +11005,13 @@ var elm$core$Maybe$map3 = F4(
 					return elm$core$Maybe$Nothing;
 				} else {
 					var c = mc.a;
-					return elm$core$Maybe$Just(
-						A3(func, a, b, c));
+					if (md.$ === 'Nothing') {
+						return elm$core$Maybe$Nothing;
+					} else {
+						var d = md.a;
+						return elm$core$Maybe$Just(
+							A4(func, a, b, c, d));
+					}
 				}
 			}
 		}
@@ -11022,11 +11027,10 @@ var abradley2$elm_datepicker$DatePicker$view = F2(
 						elm$html$Html$Attributes$class('edp-container')
 					]),
 				_List_Nil),
-			A4(
-				elm$core$Maybe$map3,
-				F3(
-					function (today, indexDate, currentMonthMap) {
-						var yearList = A2(abradley2$elm_datepicker$DatePicker$defaultedYearList, model.yearList, indexDate);
+			A5(
+				elm$core$Maybe$map4,
+				F4(
+					function (today, indexDate, currentMonthMap, yearList) {
 						var initializedModel = {currentMonthMap: currentMonthMap, id: model.id, indexDate: indexDate, monthChange: model.monthChange, previousMonthMap: model.previousMonthMap, previousSelectedDate: model.previousSelectedDate, selectedDate: model.selectedDate, selectionMode: model.selectionMode, today: today, yearList: yearList};
 						var footer = props.hideFooter ? A2(elm$html$Html$div, _List_Nil, _List_Nil) : A2(abradley2$elm_datepicker$DatePicker$bottomSection, initializedModel, props);
 						var mainSection = function () {
@@ -11068,7 +11072,8 @@ var abradley2$elm_datepicker$DatePicker$view = F2(
 					}),
 				model.today,
 				model.indexDate,
-				model.currentMonthMap));
+				model.currentMonthMap,
+				model.yearList));
 	});
 var abradley2$elm_datepicker$Demo$view = function (model) {
 	return A2(
