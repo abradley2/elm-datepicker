@@ -4,7 +4,7 @@ A configurable, well-styled, feature rich Date Picker for the lovely Elm languag
 
 [Check out the demo here](http://abradley2.github.io/elm-datepicker/)
 
-![pretty image](https://i.imgur.com/3o2WoMc.png)
+![pretty image](https://github.com/abradley2/elm-datepicker/blob/master/date_picker_img.png)
 
 ## Documentation
 
