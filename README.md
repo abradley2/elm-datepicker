@@ -1,6 +1,6 @@
 # Elm Date Picker
 
-A Material Design Date Picker for the lovely Elm language.
+A configurable, well-styled, feature rich Date Picker for the lovely Elm language.
 
 [Check out the demo here](http://abradley2.github.io/elm-datepicker/)
 
