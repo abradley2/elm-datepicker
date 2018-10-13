@@ -3,7 +3,7 @@
     "name": "abradley2/elm-datepicker",
     "summary": "A Material Design date picker component",
     "license": "MIT",
-    "version": "3.0.0",
+    "version": "4.0.0",
     "exposed-modules": [
         "DatePicker"
     ],
