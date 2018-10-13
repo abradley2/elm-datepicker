@@ -5817,27 +5817,6 @@ var abradley2$elm_datepicker$DatePicker$defaultedYearList = F2(
 				justinmimbs$date$Date$year(indexDate) + 120);
 		}
 	});
-var abradley2$elm_datepicker$DatePicker$Util$placeholder = A3(justinmimbs$date$Date$fromCalendarDate, 1970, elm$time$Time$Jan, 1);
-var abradley2$elm_datepicker$DatePicker$Util$padMonthMap = F3(
-	function (currentIndex, stopIndex, monthMap) {
-		padMonthMap:
-		while (true) {
-			if (_Utils_eq(currentIndex, stopIndex)) {
-				return monthMap;
-			} else {
-				var $temp$currentIndex = currentIndex + 1,
-					$temp$stopIndex = stopIndex,
-					$temp$monthMap = A2(
-					elm$core$List$cons,
-					_Utils_Tuple2(0, abradley2$elm_datepicker$DatePicker$Util$placeholder),
-					monthMap);
-				currentIndex = $temp$currentIndex;
-				stopIndex = $temp$stopIndex;
-				monthMap = $temp$monthMap;
-				continue padMonthMap;
-			}
-		}
-	});
 var elm$core$Basics$composeR = F3(
 	function (f, g, x) {
 		return g(
@@ -5939,6 +5918,35 @@ var justinmimbs$date$Date$month = A2(
 	justinmimbs$date$Date$toCalendarDate,
 	function ($) {
 		return $.month;
+	});
+var abradley2$elm_datepicker$DatePicker$isNewMonth = F2(
+	function (a, b) {
+		return (!_Utils_eq(
+			justinmimbs$date$Date$month(a),
+			justinmimbs$date$Date$month(b))) || (!_Utils_eq(
+			justinmimbs$date$Date$year(a),
+			justinmimbs$date$Date$year(b)));
+	});
+var abradley2$elm_datepicker$DatePicker$Util$placeholder = A3(justinmimbs$date$Date$fromCalendarDate, 1970, elm$time$Time$Jan, 1);
+var abradley2$elm_datepicker$DatePicker$Util$padMonthMap = F3(
+	function (currentIndex, stopIndex, monthMap) {
+		padMonthMap:
+		while (true) {
+			if (_Utils_eq(currentIndex, stopIndex)) {
+				return monthMap;
+			} else {
+				var $temp$currentIndex = currentIndex + 1,
+					$temp$stopIndex = stopIndex,
+					$temp$monthMap = A2(
+					elm$core$List$cons,
+					_Utils_Tuple2(0, abradley2$elm_datepicker$DatePicker$Util$placeholder),
+					monthMap);
+				currentIndex = $temp$currentIndex;
+				stopIndex = $temp$stopIndex;
+				monthMap = $temp$monthMap;
+				continue padMonthMap;
+			}
+		}
 	});
 var justinmimbs$date$Date$weekdayNumber = function (_n0) {
 	var rd = _n0.a;
@@ -6050,6 +6058,25 @@ var abradley2$elm_datepicker$DatePicker$Util$setDayOfMonth = F2(
 			justinmimbs$date$Date$month(date),
 			num);
 	});
+var elm$core$Maybe$map = F2(
+	function (f, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return elm$core$Maybe$Just(
+				f(value));
+		} else {
+			return elm$core$Maybe$Nothing;
+		}
+	});
+var elm$core$Maybe$withDefault = F2(
+	function (_default, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return value;
+		} else {
+			return _default;
+		}
+	});
 var abradley2$elm_datepicker$DatePicker$setIndexDate = F2(
 	function (model, indexDate) {
 		var lastDayOfMonth = A2(
@@ -6072,7 +6099,15 @@ var abradley2$elm_datepicker$DatePicker$setIndexDate = F2(
 						abradley2$elm_datepicker$DatePicker$Util$setDayOfMonth,
 						indexDate,
 						justinmimbs$date$Date$day(indexDate))),
-				previousMonthMap: model.currentMonthMap
+				previousMonthMap: A2(
+					elm$core$Maybe$withDefault,
+					elm$core$Maybe$Nothing,
+					A2(
+						elm$core$Maybe$map,
+						function (prevIndexDate) {
+							return A2(abradley2$elm_datepicker$DatePicker$isNewMonth, indexDate, prevIndexDate) ? model.currentMonthMap : elm$core$Maybe$Nothing;
+						},
+						model.indexDate))
 			});
 	});
 var elm$browser$Browser$External = function (a) {
@@ -6946,15 +6981,6 @@ var elm$core$Dict$isEmpty = function (dict) {
 		return false;
 	}
 };
-var elm$core$Maybe$withDefault = F2(
-	function (_default, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return value;
-		} else {
-			return _default;
-		}
-	});
 var elm$browser$Debugger$Expando$viewExtraTiny = function (value) {
 	if (value.$ === 'Record') {
 		var record = value.b;
@@ -10365,6 +10391,52 @@ var abradley2$elm_datepicker$Demo$update = F2(
 					A2(abradley2$elm_datepicker$DatePicker$update, datePickerMsg, model.datePickerData)));
 		}
 	});
+var abradley2$elm_datepicker$DatePicker$Util$daySymbol = function (weekday) {
+	switch (weekday.$) {
+		case 'Mon':
+			return 'M';
+		case 'Tue':
+			return 'T';
+		case 'Wed':
+			return 'W';
+		case 'Thu':
+			return 'T';
+		case 'Fri':
+			return 'F';
+		case 'Sat':
+			return 'S';
+		default:
+			return 'S';
+	}
+};
+var abradley2$elm_datepicker$DatePicker$Util$monthDisplay = function (month) {
+	switch (month.$) {
+		case 'Jan':
+			return 'January';
+		case 'Feb':
+			return 'February';
+		case 'Mar':
+			return 'March';
+		case 'Apr':
+			return 'April';
+		case 'May':
+			return 'May';
+		case 'Jun':
+			return 'June';
+		case 'Jul':
+			return 'July';
+		case 'Aug':
+			return 'Aug';
+		case 'Sep':
+			return 'September';
+		case 'Oct':
+			return 'October';
+		case 'Nov':
+			return 'November';
+		default:
+			return 'December';
+	}
+};
 var abradley2$elm_datepicker$DatePicker$defaultProps = {
 	canSelectDate: function (date) {
 		return true;
@@ -10376,7 +10448,9 @@ var abradley2$elm_datepicker$DatePicker$defaultProps = {
 	canSelectYear: function (year) {
 		return true;
 	},
-	hideFooter: false
+	daySymbol: abradley2$elm_datepicker$DatePicker$Util$daySymbol,
+	hideFooter: false,
+	monthDisplay: abradley2$elm_datepicker$DatePicker$Util$monthDisplay
 };
 var abradley2$elm_datepicker$DatePicker$CancelClicked = {$: 'CancelClicked'};
 var abradley2$elm_datepicker$DatePicker$SubmitClicked = function (a) {
@@ -10479,9 +10553,9 @@ var abradley2$elm_datepicker$DatePicker$daySectionMonth = F2(
 						justinmimbs$date$Date$toRataDie(model.today),
 						justinmimbs$date$Date$toRataDie(date));
 					var isSelected = function () {
-						var _n2 = model.selectedDate;
-						if (_n2.$ === 'Just') {
-							var selected = _n2.a;
+						var _n3 = model.selectedDate;
+						if (_n3.$ === 'Just') {
+							var selected = _n3.a;
 							return _Utils_eq(
 								justinmimbs$date$Date$toRataDie(selected),
 								justinmimbs$date$Date$toRataDie(date));
@@ -10489,7 +10563,8 @@ var abradley2$elm_datepicker$DatePicker$daySectionMonth = F2(
 							return false;
 						}
 					}();
-					var canSelect = props.canSelectDate(date);
+					var isPlaceholder = !dayNum;
+					var canSelect = (!isPlaceholder) && props.canSelectDate(date);
 					return A2(
 						elm$html$Html$div,
 						_List_fromArray(
@@ -10499,73 +10574,95 @@ var abradley2$elm_datepicker$DatePicker$daySectionMonth = F2(
 									[
 										_Utils_Tuple2('edp-column edp-day-number', true),
 										_Utils_Tuple2('edp-empty-column', !dayNum),
-										_Utils_Tuple2('edp-disabled-column', !canSelect),
+										_Utils_Tuple2('edp-disabled-column', (!isPlaceholder) && (!canSelect)),
 										_Utils_Tuple2('edp-day-number-selected', isSelected),
 										_Utils_Tuple2('edp-day-number-today', isToday)
 									])),
 								elm$html$Html$Events$onClick(
 								function () {
-									var _n1 = model.selectedDate;
-									if (_n1.$ === 'Just') {
-										var previousSelected = _n1.a;
-										return _Utils_eq(
-											justinmimbs$date$Date$toRataDie(previousSelected),
-											justinmimbs$date$Date$toRataDie(date)) ? abradley2$elm_datepicker$DatePicker$NoOp : A2(abradley2$elm_datepicker$DatePicker$DateSelected, date, previousSelected);
+									var _n1 = _Utils_Tuple2(canSelect, model.selectedDate);
+									if (_n1.a) {
+										if (_n1.b.$ === 'Just') {
+											var previousSelected = _n1.b.a;
+											return _Utils_eq(
+												justinmimbs$date$Date$toRataDie(previousSelected),
+												justinmimbs$date$Date$toRataDie(date)) ? abradley2$elm_datepicker$DatePicker$NoOp : A2(abradley2$elm_datepicker$DatePicker$DateSelected, date, previousSelected);
+										} else {
+											var _n2 = _n1.b;
+											return A2(abradley2$elm_datepicker$DatePicker$DateSelected, date, model.today);
+										}
 									} else {
-										return A2(abradley2$elm_datepicker$DatePicker$DateSelected, date, model.today);
+										return abradley2$elm_datepicker$DatePicker$NoOp;
 									}
 								}())
 							]),
 						_List_fromArray(
 							[
 								elm$html$Html$text(
-								elm$core$String$fromInt(dayNum))
+								isPlaceholder ? '' : elm$core$String$fromInt(dayNum))
 							]));
 				},
 				model.currentMonthMap));
 	});
-var abradley2$elm_datepicker$DatePicker$Util$getMonthInfo = function (month) {
-	switch (month.$) {
-		case 'Jan':
-			return _Utils_Tuple2('January', 1);
-		case 'Feb':
-			return _Utils_Tuple2('Febuary', 2);
-		case 'Mar':
-			return _Utils_Tuple2('March', 3);
-		case 'Apr':
-			return _Utils_Tuple2('April', 4);
-		case 'May':
-			return _Utils_Tuple2('May', 5);
-		case 'Jun':
-			return _Utils_Tuple2('June', 6);
-		case 'Jul':
-			return _Utils_Tuple2('July', 7);
-		case 'Aug':
-			return _Utils_Tuple2('August', 8);
-		case 'Sep':
-			return _Utils_Tuple2('September', 9);
-		case 'Oct':
-			return _Utils_Tuple2('October', 10);
-		case 'Nov':
-			return _Utils_Tuple2('November', 11);
-		default:
-			return _Utils_Tuple2('December', 12);
-	}
-};
-var abradley2$elm_datepicker$DatePicker$getMonthKey = function (date) {
-	return abradley2$elm_datepicker$DatePicker$Util$getMonthInfo(
-		justinmimbs$date$Date$month(date)).a;
-};
-var elm$core$Maybe$map = F2(
-	function (f, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return elm$core$Maybe$Just(
-				f(value));
-		} else {
-			return elm$core$Maybe$Nothing;
+var abradley2$elm_datepicker$DatePicker$Util$getMonthInfo = F2(
+	function (month, toStr) {
+		switch (month.$) {
+			case 'Jan':
+				return _Utils_Tuple2(
+					toStr(elm$time$Time$Jan),
+					1);
+			case 'Feb':
+				return _Utils_Tuple2(
+					toStr(elm$time$Time$Feb),
+					2);
+			case 'Mar':
+				return _Utils_Tuple2(
+					toStr(elm$time$Time$Mar),
+					3);
+			case 'Apr':
+				return _Utils_Tuple2(
+					toStr(elm$time$Time$Apr),
+					4);
+			case 'May':
+				return _Utils_Tuple2(
+					toStr(elm$time$Time$May),
+					5);
+			case 'Jun':
+				return _Utils_Tuple2(
+					toStr(elm$time$Time$Jun),
+					6);
+			case 'Jul':
+				return _Utils_Tuple2(
+					toStr(elm$time$Time$Jul),
+					7);
+			case 'Aug':
+				return _Utils_Tuple2(
+					toStr(elm$time$Time$Aug),
+					8);
+			case 'Sep':
+				return _Utils_Tuple2(
+					toStr(elm$time$Time$Sep),
+					9);
+			case 'Oct':
+				return _Utils_Tuple2(
+					toStr(elm$time$Time$Oct),
+					10);
+			case 'Nov':
+				return _Utils_Tuple2(
+					toStr(elm$time$Time$Nov),
+					11);
+			default:
+				return _Utils_Tuple2(
+					toStr(elm$time$Time$Dec),
+					12);
 		}
 	});
+var abradley2$elm_datepicker$DatePicker$getMonthKey = function (date) {
+	return A2(
+		abradley2$elm_datepicker$DatePicker$Util$getMonthInfo,
+		justinmimbs$date$Date$month(date),
+		abradley2$elm_datepicker$DatePicker$Util$monthDisplay).a;
+};
 var abradley2$elm_datepicker$DatePicker$previousMonthBody = F2(
 	function (model, props) {
 		return A2(
@@ -10696,8 +10793,10 @@ var justinmimbs$date$Date$numberToWeekday = function (wdn) {
 };
 var justinmimbs$date$Date$weekday = A2(elm$core$Basics$composeR, justinmimbs$date$Date$weekdayNumber, justinmimbs$date$Date$numberToWeekday);
 var abradley2$elm_datepicker$DatePicker$Util$getDayMonthText = function (date) {
-	var _n0 = abradley2$elm_datepicker$DatePicker$Util$getMonthInfo(
-		justinmimbs$date$Date$month(date));
+	var _n0 = A2(
+		abradley2$elm_datepicker$DatePicker$Util$getMonthInfo,
+		justinmimbs$date$Date$month(date),
+		abradley2$elm_datepicker$DatePicker$Util$monthDisplay);
 	var monthFull = _n0.a;
 	var monthInt = _n0.b;
 	var _n1 = abradley2$elm_datepicker$DatePicker$Util$getDayInfo(
@@ -10819,32 +10918,13 @@ var abradley2$elm_datepicker$DatePicker$NextMonth = function (a) {
 var abradley2$elm_datepicker$DatePicker$PreviousMonth = function (a) {
 	return {$: 'PreviousMonth', a: a};
 };
-var abradley2$elm_datepicker$DatePicker$Util$getMonthNumber = function (month) {
-	return abradley2$elm_datepicker$DatePicker$Util$getMonthInfo(month).b;
-};
-var abradley2$elm_datepicker$DatePicker$Util$getNextMonthNumber = A2(
-	elm$core$Basics$composeR,
-	abradley2$elm_datepicker$DatePicker$Util$getMonthNumber,
-	elm$core$Basics$add(2));
-var abradley2$elm_datepicker$DatePicker$Util$getPreviousMonthNumber = A2(
-	elm$core$Basics$composeR,
-	abradley2$elm_datepicker$DatePicker$Util$getMonthNumber,
-	function (n) {
-		return n - 1;
-	});
 var elm$html$Html$i = _VirtualDom_node('i');
 var abradley2$elm_datepicker$DatePicker$monthChangeSection = F2(
 	function (model, props) {
 		var year = justinmimbs$date$Date$year(model.indexDate);
 		var month = justinmimbs$date$Date$month(model.indexDate);
-		var canSelectPrevious = A2(
-			props.canSelectMonth,
-			year,
-			abradley2$elm_datepicker$DatePicker$Util$getPreviousMonthNumber(month));
-		var canSelectNext = A2(
-			props.canSelectMonth,
-			year,
-			abradley2$elm_datepicker$DatePicker$Util$getNextMonthNumber(month));
+		var canSelectPrevious = A2(props.canSelectMonth, year, month);
+		var canSelectNext = A2(props.canSelectMonth, year, month);
 		return A2(
 			elm$html$Html$div,
 			_List_fromArray(
@@ -10886,8 +10966,10 @@ var abradley2$elm_datepicker$DatePicker$monthChangeSection = F2(
 						[
 							elm$html$Html$text(
 							function () {
-								var _n0 = abradley2$elm_datepicker$DatePicker$Util$getMonthInfo(
-									justinmimbs$date$Date$month(model.indexDate));
+								var _n0 = A2(
+									abradley2$elm_datepicker$DatePicker$Util$getMonthInfo,
+									justinmimbs$date$Date$month(model.indexDate),
+									props.monthDisplay);
 								var monthFull = _n0.a;
 								var monthInt = _n0.b;
 								return monthFull + (' ' + elm$core$String$fromInt(
@@ -10944,8 +11026,11 @@ var abradley2$elm_datepicker$DatePicker$weekSection = F2(
 								elm$html$Html$text(symbol)
 							]));
 				},
-				_List_fromArray(
-					['S', 'M', 'T', 'W', 'T', 'F', 'S'])));
+				A2(
+					elm$core$List$map,
+					props.daySymbol,
+					_List_fromArray(
+						[elm$time$Time$Sun, elm$time$Time$Mon, elm$time$Time$Tue, elm$time$Time$Wed, elm$time$Time$Thu, elm$time$Time$Fri, elm$time$Time$Sat]))));
 	});
 var abradley2$elm_datepicker$DatePicker$yearSection = function (model) {
 	var workingDate = A2(elm$core$Maybe$withDefault, model.today, model.selectedDate);

@@ -47,8 +47,8 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.Keyed as Keyed
-import Process
 import Task
+import Time exposing (Month(..), Weekday(..))
 
 
 {-| Represents the current mode the picker is set to
@@ -160,8 +160,25 @@ setIndexDate model indexDate =
             -- this will set it to beginning of day
             Just (setDayOfMonth indexDate (Date.day indexDate))
         , currentMonthMap = Just monthMap
-        , previousMonthMap = model.currentMonthMap
+
+        -- only set previous month map if index date is of different month
+        , previousMonthMap =
+            Maybe.map
+                (\prevIndexDate ->
+                    if isNewMonth indexDate prevIndexDate then
+                        model.currentMonthMap
+
+                    else
+                        Nothing
+                )
+                model.indexDate
+                |> Maybe.withDefault Nothing
     }
+
+
+isNewMonth : Date -> Date -> Bool
+isNewMonth a b =
+    Date.month a /= Date.month b || Date.year a /= Date.year b
 
 
 {-| `DatePicker.init` returns an initialized record of `DatePicker.Model`. Do not throw out the returned command!
@@ -201,9 +218,9 @@ init id =
 
 
 {-| `DatePicker.update` consumes the message you've mapped and a `DatePicker.Model` record to output `( DatePicker.Model, Cmd DatePicker.Msg)`.
-You will need to alter your update function to handle any `DatePicker.Msg` that flows through.
+You will need to alter your update function to handle any `DatePicker.Msg` that flows through. This is a bit of a long doc snippet, but you can check out `src/Demo.elm` to see it in action!
 
-    import DatePicker exposing (Msg(SelectDate))
+    import DatePicker exposing (Msg(..))
     ...
     handleDatePickerMsg model datePickerMsg =
         let
@@ -222,8 +239,26 @@ You will need to alter your update function to handle any `DatePicker.Msg` that 
             NoOp ->
                 ( model, Cmd.none )
 
-            DatePickerMsg datePickerMsg ->
-                handleDatePickerMsg model datePickerMsg
+        DatePickerMsg datePickerMsg ->
+            DatePicker.update datePickerMsg model.datePickerData
+                -- set the data returned from datePickerUpdate.
+                -- Don't discard the command!
+                |> (\( data, cmd ) ->
+                        ( { model | datePickerData = data }
+                        , Cmd.map DatePickerMsg cmd
+                        )
+                   )
+                -- and now we can respond to any internal messages we want
+                |> (\( newModel, cmd ) ->
+                        case datePickerMsg of
+                            SubmitClicked selectedDate ->
+                                ( { newModel | selectedDate = Just selectedDate }
+                                , cmd
+                                )
+
+                            _ ->
+                                ( newModel, cmd )
+                   )
 
 -}
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -315,9 +350,11 @@ that generally determine the range of selectable dates
 -}
 type alias Props =
     { canSelectYear : Int -> Bool
-    , canSelectMonth : Int -> Int -> Bool
+    , canSelectMonth : Int -> Month -> Bool
     , canSelectDate : Date -> Bool
     , hideFooter : Bool
+    , monthDisplay : Month -> String
+    , daySymbol : Weekday -> String
     }
 
 
@@ -349,6 +386,8 @@ defaultProps =
     , canSelectMonth = \year month -> True
     , canSelectDate = \date -> True
     , hideFooter = False
+    , monthDisplay = monthDisplay
+    , daySymbol = daySymbol
     }
 
 
@@ -436,10 +475,10 @@ monthChangeSection model props =
             Date.month model.indexDate
 
         canSelectNext =
-            props.canSelectMonth year <| getNextMonthNumber month
+            props.canSelectMonth year month
 
         canSelectPrevious =
-            props.canSelectMonth year <| getPreviousMonthNumber month
+            props.canSelectMonth year month
     in
     div
         [ class "edp-month-change-section edp-body-section"
@@ -464,7 +503,7 @@ monthChangeSection model props =
             [ text
                 (let
                     ( monthFull, monthInt ) =
-                        getMonthInfo (Date.month model.indexDate)
+                        getMonthInfo (Date.month model.indexDate) props.monthDisplay
                  in
                  monthFull ++ " " ++ (String.fromInt <| Date.year model.indexDate)
                 )
@@ -495,7 +534,9 @@ weekSection model props =
             (\symbol ->
                 div [ class "edp-column edp-day-symbol" ] [ text symbol ]
             )
-            [ "S", "M", "T", "W", "T", "F", "S" ]
+            (List.map props.daySymbol
+                [ Sun, Mon, Tue, Wed, Thu, Fri, Sat ]
+            )
         )
 
 
@@ -516,32 +557,42 @@ daySectionMonth model props =
                     isToday =
                         Date.toRataDie model.today == Date.toRataDie date
 
+                    isPlaceholder =
+                        dayNum == 0
+
                     canSelect =
-                        props.canSelectDate date
+                        not isPlaceholder && props.canSelectDate date
                 in
                 div
                     [ classList
                         [ ( "edp-column edp-day-number", True )
                         , ( "edp-empty-column", dayNum == 0 )
-                        , ( "edp-disabled-column", canSelect == False )
+                        , ( "edp-disabled-column", not isPlaceholder && canSelect == False )
                         , ( "edp-day-number-selected", isSelected )
                         , ( "edp-day-number-today", isToday )
                         ]
                     , onClick
-                        (case model.selectedDate of
-                            Just previousSelected ->
+                        (case ( canSelect, model.selectedDate ) of
+                            ( True, Just previousSelected ) ->
                                 if Date.toRataDie previousSelected == Date.toRataDie date then
                                     NoOp
 
                                 else
                                     DateSelected date previousSelected
 
-                            Nothing ->
+                            ( True, Nothing ) ->
                                 DateSelected date model.today
+
+                            ( False, _ ) ->
+                                NoOp
                         )
                     ]
-                    [ text
-                        (String.fromInt dayNum)
+                    [ text <|
+                        if isPlaceholder then
+                            ""
+
+                        else
+                            String.fromInt dayNum
                     ]
             )
             model.currentMonthMap
@@ -550,7 +601,7 @@ daySectionMonth model props =
 
 getMonthKey : Date -> String
 getMonthKey date =
-    Tuple.first <| getMonthInfo (Date.month date)
+    Tuple.first <| getMonthInfo (Date.month date) monthDisplay
 
 
 previousMonthBody : InitializedModel -> Props -> Maybe ( String, Html Msg )

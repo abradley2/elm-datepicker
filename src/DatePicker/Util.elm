@@ -1,14 +1,13 @@
 module DatePicker.Util exposing
     ( buildMonthMap
+    , daySymbol
     , getDayInfo
     , getDayMonthText
     , getDayNum
     , getLastDayOfMonth
     , getMonthInfo
-    , getMonthNumber
-    , getNextMonthNumber
-    , getPreviousMonthNumber
     , isJust
+    , monthDisplay
     , padMonthMap
     , setDayOfMonth
     )
@@ -47,56 +46,44 @@ getDayNum date =
     Tuple.second <| getDayInfo (weekday date)
 
 
-getMonthInfo : Month -> ( String, Int )
-getMonthInfo month =
+getMonthInfo : Month -> (Month -> String) -> ( String, Int )
+getMonthInfo month toStr =
     case month of
         Jan ->
-            ( "January", 1 )
+            ( toStr Jan, 1 )
 
         Feb ->
-            ( "Febuary", 2 )
+            ( toStr Feb, 2 )
 
         Mar ->
-            ( "March", 3 )
+            ( toStr Mar, 3 )
 
         Apr ->
-            ( "April", 4 )
+            ( toStr Apr, 4 )
 
         May ->
-            ( "May", 5 )
+            ( toStr May, 5 )
 
         Jun ->
-            ( "June", 6 )
+            ( toStr Jun, 6 )
 
         Jul ->
-            ( "July", 7 )
+            ( toStr Jul, 7 )
 
         Aug ->
-            ( "August", 8 )
+            ( toStr Aug, 8 )
 
         Sep ->
-            ( "September", 9 )
+            ( toStr Sep, 9 )
 
         Oct ->
-            ( "October", 10 )
+            ( toStr Oct, 10 )
 
         Nov ->
-            ( "November", 11 )
+            ( toStr Nov, 11 )
 
         Dec ->
-            ( "December", 12 )
-
-
-getMonthNumber month =
-    Tuple.second <| getMonthInfo month
-
-
-getNextMonthNumber =
-    getMonthNumber >> (+) 2
-
-
-getPreviousMonthNumber =
-    getMonthNumber >> (\n -> n - 1)
+            ( toStr Dec, 12 )
 
 
 getLastDayOfMonth : Date -> Int -> Int
@@ -163,7 +150,7 @@ setDayOfMonth date num =
 getDayMonthText date =
     let
         ( monthFull, monthInt ) =
-            getMonthInfo <| Date.month date
+            getMonthInfo (Date.month date) monthDisplay
 
         ( dayShort, dayInt ) =
             getDayInfo <| weekday date
@@ -173,3 +160,68 @@ getDayMonthText date =
 
 isJust =
     Maybe.map (\_ -> True) >> Maybe.withDefault False
+
+
+monthDisplay : Month -> String
+monthDisplay month =
+    case month of
+        Jan ->
+            "January"
+
+        Feb ->
+            "February"
+
+        Mar ->
+            "March"
+
+        Apr ->
+            "April"
+
+        May ->
+            "May"
+
+        Jun ->
+            "June"
+
+        Jul ->
+            "July"
+
+        Aug ->
+            "Aug"
+
+        Sep ->
+            "September"
+
+        Oct ->
+            "October"
+
+        Nov ->
+            "November"
+
+        Dec ->
+            "December"
+
+
+daySymbol : Weekday -> String
+daySymbol weekday =
+    case weekday of
+        Mon ->
+            "M"
+
+        Tue ->
+            "T"
+
+        Wed ->
+            "W"
+
+        Thu ->
+            "T"
+
+        Fri ->
+            "F"
+
+        Sat ->
+            "S"
+
+        Sun ->
+            "S"
