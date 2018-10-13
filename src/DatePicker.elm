@@ -181,7 +181,7 @@ isNewMonth a b =
 
 {-| `DatePicker.init` returns an initialized record of `DatePicker.Model`. Do not throw out the returned command!
 The command is used to get today's current date which the date picker uses as the default for display.
-The string passed as the first argument must be a unique `id` for the date picker
+The string passed as the first argument must be a unique `id` for the date picker.
 
     import DatePicker
 
@@ -215,21 +215,10 @@ init id =
     )
 
 
-{-| `DatePicker.update` consumes the message you've mapped and a `DatePicker.Model` record to output `( DatePicker.Model, Cmd DatePicker.Msg)`.
-You will need to alter your update function to handle any `DatePicker.Msg` that flows through. This is a bit of a long doc snippet, but you can check out `src/Demo.elm` to see it in action!
+{-| Use `DatePicker.update` to create updated date picker models from any message events.
+For a nice full working example check out the [demo source here](https://github.com/abradley2/elm-datepicker/blob/master/src/Demo.elm)
 
     import DatePicker exposing (Msg(..))
-    ...
-    handleDatePickerMsg model datePickerMsg =
-        let
-            (datePickerData, datePickerCmd) =
-                DatePicker.update datePickerMsg model.datePickerData
-        in
-            ( { model
-              | datePickerData = datePickerData
-              }
-            , Cmd.map DatePickerMsg datePickerCmd
-            )
     ...
     update : Msg -> Model -> ( Model, Cmd Msg )
     update msg model =
@@ -238,25 +227,18 @@ You will need to alter your update function to handle any `DatePicker.Msg` that 
                 ( model, Cmd.none )
 
         DatePickerMsg datePickerMsg ->
-            DatePicker.update datePickerMsg model.datePickerData
-                -- set the data returned from datePickerUpdate.
-                -- Don't discard the command!
-                |> (\( data, cmd ) ->
-                        ( { model | datePickerData = data }
-                        , Cmd.map DatePickerMsg cmd
-                        )
-                   )
-                -- and now we can respond to any internal messages we want
-                |> (\( newModel, cmd ) ->
-                        case datePickerMsg of
-                            SubmitClicked selectedDate ->
-                                ( { newModel | selectedDate = Just selectedDate }
-                                , cmd
-                                )
-
-                            _ ->
-                                ( newModel, cmd )
-                   )
+            let
+                (updatedPicker, pickerCmd) =
+                    DatePicker.update
+                        datepickerMsg
+                        model.datePickerData
+            in
+                ({ model
+                 | datePickerData = updatedPicker
+                 , selectedDate = datePickerData.selectedDate
+                }
+                , Cmd.map DatePickerMsg pickerCmd
+                )
 
 -}
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -348,38 +330,50 @@ update msg model =
 that generally determine the range of selectable dates. Extend off `DatePicker.defaultProps`
 to avoid having to define all of these when you only wish to configure a few.
 
-    -- given the year, return whether this year is allowed to be selected
+---
+
+**Property Descriptions**
+
+given the year, return whether this year is allowed to be selected
+
     canSelectYear : Int -> Bool
 
-    -- given the year and the month, return whether this month is allowed to be selected
+given the year and the month, return whether this month is allowed to be selected
+
     canSelectMonth : Int -> Month -> Bool
 
-    -- given the date, return whether this is allowed to be selected
+given the date, return whether this is allowed to be selected
+
     canSelectDate : Date -> Bool
 
-    -- should the footer of the calendar with the "CANCEL" and "OK" buttons display
+should the footer of the calendar with the "CANCEL" and "OK" buttons display
+
     hideFooter : Bool
 
-    -- text for the "OK" button which is enabled whenever a date is selected.
-    -- defaults to "OK"
+text for the "OK" button which is enabled whenever a date is selected.
+defaults to "OK"
+
     okButtonText : String
 
-    -- text for the "CANCEL" button. Defaults to "CANCEL"
+text for the "CANCEL" button. Defaults to "CANCEL"
+
     cancelButtonText : String
 
-    -- return whatever text to show given the month
-    -- (this is just below the calendar header)
+return whatever text to show given the month (this is just below the calendar header)
+
     monthDisplay : Time.Month -> String
 
-    -- return whatever text (generally a single letter or two) to show
-    -- given the weekday (these are the small letters the top of the month)
+return whatever text (generally a single letter or two) to show
+given the weekday (these are the small letters the top of the month)
+
     daySymbol : Time.Weekday -> String
 
-    -- return whatever text to show given the selected Date
-    -- (This is the large display text on the calendar header)
-    -- The first date is the "selectedDate" which may not yet be defined.
-    -- The second is the "indexDate" which is the current placeholder
-    -- date being used (generally set to today's date by default)
+return whatever text to show given the selected Date
+(This is the large display text on the calendar header)
+The first date is the "selectedDate" which may not yet be defined.
+The second is the "indexDate" which is the current placeholder
+date being used (generally set to today's date by default)
+
     selectedDateDisplay : Maybe Date -> Date -> String
 
 -}
