@@ -21,9 +21,9 @@ $disabled
             display inline-block
             padding 10px
             transition box-shadow .25s
-            box-shadow 1px 2px 3px rgba(0, 0, 0, 0.18)
+            box-shadow 1px 1px 1px 1px rgba(0, 0, 0, 0.18)
             &.edp-header-active
-                box-shadow 0px 0px 0px rgba(0, 0, 0, 0.18)
+                box-shadow 0px 0px 0px 0px rgba(0, 0, 0, 0.18)
                 font-weight bolder
             cursor pointer
             font-size 14px
@@ -59,13 +59,14 @@ $disabled
             margin-right 1px
             animation-name edp-slideupnext
         &:not(.edp-header-active):not(.edp-month-day-previous)
-            box-shadow 1px 2px 3px rgba(0, 0, 0, 0.18)
+            box-shadow 1px 1px 1px 1px rgba(0, 0, 0, 0.18)
 
 
     .edp-month-slider
         top 0
         left 0
         width 300px
+        height 240px
         position absolute
         animation-duration .35s
         animation-fill-mode forwards
@@ -78,17 +79,34 @@ $disabled
         &.edp-out-previous
             animation-name edp-slideoutprevious
 
+    .edp-caret-button
+        cursor pointer
+        padding 8px
+        &.edp-disabled
+            @extends $disabled
+
+    .edp-caret
+        height 12px
+        width 12px
+        display inline-block
+        border-left 2px solid label-color
+        border-bottom 2px solid label-color
+        cursor pointer
+        &.edp-disabled
+            opacity 0.2
+            @extends $disabled
+        &.edp-caret-left
+            transform rotate(45deg)
+        &.edp-caret-right
+            transform rotate(-135deg)
+ 
+
     .edp-month-change-section
         display flex
         color font-color
         justify-content space-between
         align-items center
-        .arrow-icon
-            padding 8px
-            cursor pointer
-            color label-color
-            &.edp-disabled
-                @extends $disabled
+        height 40px
 
     .edp-column
         width 40px
@@ -118,7 +136,10 @@ $disabled
             color white
 
     .edp-empty-column
-        point-events none
+        pointer-events none
+        -moz-user-select none
+        -webkit-user-select none
+        user-select none
         color rgba(255, 255, 255, 0)
 
     .edp-disabled-column
@@ -128,7 +149,6 @@ $disabled
         background-color white
         padding-left 8px
         padding-right 8px
-        height 40px
 
     .edp-bottom-section
         display flex
@@ -171,6 +191,8 @@ $disabled
             height 50px
             line-height 50px
             font-size 32px
+        &.edp-disabled
+            @extends $disabled
 
 
     .edp-year-picker

@@ -68,6 +68,15 @@ subscriptions model =
     Sub.none
 
 
+getDatePickerProps : DatePicker.Props
+getDatePickerProps =
+    let
+        defaultProps =
+            DatePicker.defaultProps
+    in
+    defaultProps
+
+
 view : Model -> Html Msg
 view model =
     div
@@ -80,7 +89,7 @@ view model =
             ]
             [ DatePicker.view
                 model.datePickerData
-                DatePicker.defaultProps
+                getDatePickerProps
                 |> Html.map DatePickerMsg
             ]
         ]

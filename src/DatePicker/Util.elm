@@ -134,9 +134,16 @@ buildMonthMap currentMap currentDay lastDay firstDate indexDate =
     else
         let
             padSize =
-                weekdayNumber firstDate
+                weekdayNumber
+                    firstDate
         in
-        padMonthMap 0 padSize newMap
+        if padSize /= 7 then
+            padMonthMap 0 padSize newMap
+
+        else
+            -- if the padding is 7 days we don't need to insert an entirely
+            -- empty row. So don't bother
+            newMap
 
 
 setDayOfMonth : Date -> Int -> Date
@@ -147,6 +154,7 @@ setDayOfMonth date num =
         num
 
 
+getDayMonthText : Date -> String
 getDayMonthText date =
     let
         ( monthFull, monthInt ) =

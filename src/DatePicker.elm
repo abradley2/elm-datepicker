@@ -5,17 +5,15 @@ module DatePicker exposing
     , SelectionMode
     )
 
-{-| This module provides a material-style date picker for Elm.
+{-| This module provides a styled date picker for Elm.
 [You can check out the demo here.](http://abradley2.github.io/elm-datepicker/)
-Since this date picker
-uses material-icons, you will need to have these included on your page.
-Also include the `DatePicker.css` found in the root of this directory.
-
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="DatePicker.css" />
 
 To alter the color theme edit `./styl/Variables.styl`, then run
 `npm install && npm run build-styles`.
+
+This library depends heavily on [justinmimbs/date](https://package.elm-lang.org/packages/justinmimbs/date/3.1.2/) as
+this provides a nice RD based wrapper around Dates that is agnostic to time/timezone, which is better suited for
+calendars. See the documentation there for any specific handling of the `Date` type.
 
 
 # Tea / Initialization
@@ -275,6 +273,7 @@ update msg model =
             ( { newModel
                 | selectedDate = Just date
                 , previousSelectedDate = Just previousDate
+                , selectionMode = Calendar
               }
             , Cmd.none
             )
@@ -346,7 +345,43 @@ update msg model =
 
 
 {-| The second argument passed to `DatePicker.view`. These are configuration properties
-that generally determine the range of selectable dates
+that generally determine the range of selectable dates. Extend off `DatePicker.defaultProps`
+to avoid having to define all of these when you only wish to configure a few.
+
+    -- given the year, return whether this year is allowed to be selected
+    canSelectYear : Int -> Bool
+
+    -- given the year and the month, return whether this month is allowed to be selected
+    canSelectMonth : Int -> Month -> Bool
+
+    -- given the date, return whether this is allowed to be selected
+    canSelectDate : Date -> Bool
+
+    -- should the footer of the calendar with the "CANCEL" and "OK" buttons display
+    hideFooter : Bool
+
+    -- text for the "OK" button which is enabled whenever a date is selected.
+    -- defaults to "OK"
+    okButtonText : String
+
+    -- text for the "CANCEL" button. Defaults to "CANCEL"
+    cancelButtonText : String
+
+    -- return whatever text to show given the month
+    -- (this is just below the calendar header)
+    monthDisplay : Time.Month -> String
+
+    -- return whatever text (generally a single letter or two) to show
+    -- given the weekday (these are the small letters the top of the month)
+    daySymbol : Time.Weekday -> String
+
+    -- return whatever text to show given the selected Date
+    -- (This is the large display text on the calendar header)
+    -- The first date is the "selectedDate" which may not yet be defined.
+    -- The second is the "indexDate" which is the current placeholder
+    -- date being used (generally set to today's date by default)
+    selectedDateDisplay : Maybe Date -> Date -> String
+
 -}
 type alias Props =
     { canSelectYear : Int -> Bool
@@ -355,6 +390,9 @@ type alias Props =
     , hideFooter : Bool
     , monthDisplay : Month -> String
     , daySymbol : Weekday -> String
+    , selectedDateDisplay : Maybe Date -> Date -> String
+    , okButtonText : String
+    , cancelButtonText : String
     }
 
 
@@ -372,11 +410,17 @@ defaultedYearList yearList indexDate =
 These mostly center around limiting the user to a specific selection range of dates.
 By default, nothing is restricted.
 
-    defaultProps =
-        { canSelectYear = \year -> True
-        , canSelectMonth = \year month -> True
-        , canSelectDate = \date -> True
-        , hideFooter = False
+Here's an example of how you might configure these:
+
+    getDatePickerProps : DatePicker.Props
+    getDatePickerProps =
+        let
+            defaultProps =
+                DatePicker.defaultProps
+        in
+        { defaultProps
+            | canSelectYear = \year -> year < 2020
+            , okButtonText = "CONFIRM"
         }
 
 -}
@@ -388,6 +432,12 @@ defaultProps =
     , hideFooter = False
     , monthDisplay = monthDisplay
     , daySymbol = daySymbol
+    , selectedDateDisplay =
+        \maybeDate date ->
+            Maybe.map getDayMonthText maybeDate
+                |> Maybe.withDefault (getDayMonthText date)
+    , okButtonText = "OK"
+    , cancelButtonText = "CANCEL"
     }
 
 
@@ -397,38 +447,30 @@ displayYear =
 
 headerYearDisplay : Date -> InitializedModel -> Props -> Html Msg
 headerYearDisplay displayDate model props =
-    let
-        msgSetMode =
-            case model.selectionMode of
-                YearPicker ->
-                    SetSelectionMode Calendar
-
-                Calendar ->
-                    SetSelectionMode YearPicker
-    in
     div
         [ classList
             [ ( "edp-header-year", True )
+            , ( "edp-header-active", model.selectionMode == YearPicker )
             ]
-        , onClick msgSetMode
+        , onClick (SetSelectionMode YearPicker)
         ]
         [ displayYear displayDate ]
 
 
-headerDayMonthDisplay : Bool -> Maybe Date -> InitializedModel -> Maybe ( String, Html Msg )
-headerDayMonthDisplay isPreviousDate date model =
+headerDayMonthDisplay : Bool -> Maybe Date -> InitializedModel -> Props -> Maybe ( String, Html Msg )
+headerDayMonthDisplay isPreviousDate date model props =
     Maybe.map
         (\justDate ->
-            ( getDayMonthText justDate
+            ( props.selectedDateDisplay date model.indexDate
             , div
                 [ classList
                     [ ( "edp-header-month-day", True )
-                    , ( "edp-header-active", True )
+                    , ( "edp-header-active", model.selectionMode == Calendar )
                     , ( "edp-month-day-previous", isPreviousDate )
                     ]
                 , onClick <| SetSelectionMode Calendar
                 ]
-                [ text (getDayMonthText justDate)
+                [ text (props.selectedDateDisplay date model.indexDate)
                 ]
             )
         )
@@ -449,6 +491,7 @@ headerSection displayDate model props =
                 (headerDayMonthDisplay True
                     model.previousSelectedDate
                     model
+                    props
                 )
             , Maybe.withDefault
                 ( "current", div [] [] )
@@ -460,6 +503,7 @@ headerSection displayDate model props =
                         Just model.today
                     )
                     model
+                    props
                 )
             ]
         ]
@@ -471,33 +515,42 @@ monthChangeSection model props =
         year =
             Date.year model.indexDate
 
-        month =
-            Date.month model.indexDate
+        previousMonthIndexDate =
+            add Months -1 model.indexDate
+
+        nextMonthIndexDate =
+            add Months 1 model.indexDate
 
         canSelectNext =
-            props.canSelectMonth year month
+            props.canSelectMonth year (Date.month nextMonthIndexDate)
+                && props.canSelectYear (Date.year nextMonthIndexDate)
 
         canSelectPrevious =
-            props.canSelectMonth year month
+            props.canSelectMonth year (Date.month previousMonthIndexDate)
+                && props.canSelectYear (Date.year previousMonthIndexDate)
     in
     div
         [ class "edp-month-change-section edp-body-section"
         ]
         [ div
-            [ onClick <|
+            [ classList
+                [ ( "edp-caret-button", True )
+                , ( "edp-disabled", canSelectPrevious == False )
+                ]
+            , onClick <|
                 if canSelectPrevious then
-                    PreviousMonth (add Months -1 model.indexDate)
+                    PreviousMonth previousMonthIndexDate
 
                 else
                     NoOp
             ]
-            [ i
+            [ div
                 [ classList
-                    [ ( "material-icons arrow-icon", True )
-                    , ( "edp-disabled", canSelectPrevious == False )
+                    [ ( "edp-caret edp-caret-left", True )
+                    , ( "edp-disabled", not canSelectPrevious )
                     ]
                 ]
-                [ text "keyboard_arrow_left" ]
+                []
             ]
         , div []
             [ text
@@ -509,20 +562,24 @@ monthChangeSection model props =
                 )
             ]
         , div
-            [ onClick <|
+            [ classList
+                [ ( "edp-caret-button", True )
+                , ( "edp-disabled", canSelectNext == False )
+                ]
+            , onClick <|
                 if canSelectNext then
-                    NextMonth (add Months 1 model.indexDate)
+                    NextMonth nextMonthIndexDate
 
                 else
                     NoOp
             ]
-            [ i
+            [ div
                 [ classList
-                    [ ( "material-icons arrow-icon", True )
-                    , ( "edp-disabled", canSelectPrevious == False )
+                    [ ( "edp-caret edp-caret-right", True )
+                    , ( "edp-disabled", not canSelectNext )
                     ]
                 ]
-                [ text "keyboard_arrow_right" ]
+                []
             ]
         ]
 
@@ -589,7 +646,7 @@ daySectionMonth model props =
                     ]
                     [ text <|
                         if isPlaceholder then
-                            ""
+                            "."
 
                         else
                             String.fromInt dayNum
@@ -654,7 +711,7 @@ bottomSection model props =
             [ onClick CancelClicked
             , class "edp-button"
             ]
-            [ text "CANCEL" ]
+            [ text props.cancelButtonText ]
         , button
             [ classList
                 [ ( "edp-button", True )
@@ -669,12 +726,12 @@ bottomSection model props =
                         NoOp
                 )
             ]
-            [ text "OK" ]
+            [ text props.okButtonText ]
         ]
 
 
-yearSection : InitializedModel -> Html Msg
-yearSection model =
+yearSection : InitializedModel -> Props -> Html Msg
+yearSection model props =
     let
         workingDate =
             Maybe.withDefault model.today model.selectedDate
@@ -686,14 +743,24 @@ yearSection model =
                 (Date.day dt)
 
         viewYear year =
+            let
+                canSelect =
+                    props.canSelectYear year
+            in
             div []
                 [ button
                     [ classList
                         [ ( "edp-button", True )
                         , ( "edp-year-button", True )
                         , ( "edp-year-button-selected", year == Date.year workingDate )
+                        , ( "edp-disabled", not canSelect )
                         ]
-                    , onClick (DateSelected (applyYear workingDate year) workingDate)
+                    , onClick <|
+                        if canSelect then
+                            DateSelected (applyYear workingDate year) workingDate
+
+                        else
+                            NoOp
                     ]
                     [ text (String.fromInt year) ]
                 ]
@@ -755,7 +822,7 @@ view model props =
 
                             YearPicker ->
                                 div []
-                                    [ yearSection initializedModel
+                                    [ yearSection initializedModel props
                                     , footer
                                     ]
                 in

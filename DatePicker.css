@@ -1,5 +1,7 @@
-.edp-container .edp-month-change-section .arrow-icon.edp-disabled,
-.edp-container .edp-button.edp-disabled {
+.edp-container .edp-caret-button.edp-disabled,
+.edp-container .edp-caret.edp-disabled,
+.edp-container .edp-button.edp-disabled,
+.edp-container .edp-year-button.edp-disabled {
   color: rgba(0,0,0,0.16);
   cursor: not-allowed;
 }
@@ -21,12 +23,12 @@
   display: inline-block;
   padding: 10px;
   transition: box-shadow 0.25s;
-  box-shadow: 1px 2px 3px rgba(0,0,0,0.18);
+  box-shadow: 1px 1px 1px 1px rgba(0,0,0,0.18);
   cursor: pointer;
   font-size: 14px;
 }
 .edp-container .edp-header-section .edp-header-year.edp-header-active {
-  box-shadow: 0px 0px 0px rgba(0,0,0,0.18);
+  box-shadow: 0px 0px 0px 0px rgba(0,0,0,0.18);
   font-weight: bolder;
 }
 .edp-container .edp-month-wrapper {
@@ -62,12 +64,13 @@
   animation-name: edp-slideupnext;
 }
 .edp-container .edp-header-month-day:not(.edp-header-active):not(.edp-month-day-previous) {
-  box-shadow: 1px 2px 3px rgba(0,0,0,0.18);
+  box-shadow: 1px 1px 1px 1px rgba(0,0,0,0.18);
 }
 .edp-container .edp-month-slider {
   top: 0;
   left: 0;
   width: 300px;
+  height: 240px;
   position: absolute;
   animation-duration: 0.35s;
   animation-fill-mode: forwards;
@@ -84,16 +87,33 @@
 .edp-container .edp-month-slider.edp-out-previous {
   animation-name: edp-slideoutprevious;
 }
+.edp-container .edp-caret-button {
+  cursor: pointer;
+  padding: 8px;
+}
+.edp-container .edp-caret {
+  height: 12px;
+  width: 12px;
+  display: inline-block;
+  border-left: 2px solid rgba(0,0,0,0.54);
+  border-bottom: 2px solid rgba(0,0,0,0.54);
+  cursor: pointer;
+}
+.edp-container .edp-caret.edp-disabled {
+  opacity: 0.2;
+}
+.edp-container .edp-caret.edp-caret-left {
+  transform: rotate(45deg);
+}
+.edp-container .edp-caret.edp-caret-right {
+  transform: rotate(-135deg);
+}
 .edp-container .edp-month-change-section {
   display: flex;
   color: rgba(0,0,0,0.84);
   justify-content: space-between;
   align-items: center;
-}
-.edp-container .edp-month-change-section .arrow-icon {
-  padding: 8px;
-  cursor: pointer;
-  color: rgba(0,0,0,0.54);
+  height: 40px;
 }
 .edp-container .edp-column {
   width: 40px;
@@ -126,7 +146,10 @@
   color: #fff;
 }
 .edp-container .edp-empty-column {
-  point-events: none;
+  pointer-events: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
   color: rgba(255,255,255,0);
 }
 .edp-container .edp-disabled-column {
@@ -136,7 +159,6 @@
   background-color: #fff;
   padding-left: 8px;
   padding-right: 8px;
-  height: 40px;
 }
 .edp-container .edp-bottom-section {
   display: flex;
