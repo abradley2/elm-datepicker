@@ -1,8 +1,9 @@
 module DatePicker exposing
-    ( Msg(..), init, initFromDate, update, Model
+    ( Msg(..), init, update, Model
     , view, Props, defaultProps
     , setIndexDate
     , SelectionMode
+    , initFromDate
     )
 
 {-| This module provides a styled date picker for Elm.
@@ -219,17 +220,19 @@ init id =
 -}
 initFromDate : String -> Date -> Model
 initFromDate id date =
-    setIndexDate { id = id
-    , today = Just date
-    , indexDate = Nothing
-    , currentMonthMap = Nothing
-    , previousMonthMap = Nothing
-    , selectedDate = Nothing
-    , previousSelectedDate = Nothing
-    , monthChange = None
-    , selectionMode = Calendar
-    , yearList = Just (defaultedYearList Nothing date)
-    } date
+    setIndexDate
+        { id = id
+        , today = Just date
+        , indexDate = Nothing
+        , currentMonthMap = Nothing
+        , previousMonthMap = Nothing
+        , selectedDate = Nothing
+        , previousSelectedDate = Nothing
+        , monthChange = None
+        , selectionMode = Calendar
+        , yearList = Just (defaultedYearList Nothing date)
+        }
+        date
 
 
 {-| Use `DatePicker.update` to create updated date picker models from any message events.

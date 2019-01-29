@@ -5,7 +5,7 @@
   "main": "index.html",
   "scripts": {
     "start": "concurrently \"elm-live ./src/Demo.elm --open --pushstate -- --debug --output=demo.js\" \"stylus -w ./styl/DatePicker.styl -o ./\"",
-    "build": "npm run build-styles && elm make ./src/Demo.elm --output ./demo.js",
+    "build": "npm run build-styles && elm make ./src/Demo.elm --output ./demo.js && uglifyjs ./demo.js -o demo.js",
     "build-styles": "stylus ./styl/DatePicker.styl -o ./",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -16,6 +16,7 @@
   },
   "devDependencies": {
     "concurrently": "^3.5.1",
-    "stylus": "^0.54.5"
+    "stylus": "^0.54.5",
+    "uglify-js": "^3.4.9"
   }
 }
