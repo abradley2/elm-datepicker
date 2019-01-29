@@ -1,9 +1,8 @@
 module DatePicker exposing
-    ( Msg(..), init, update, Model
+    ( Msg(..), init, initFromDate, update, Model
     , view, Props, defaultProps
     , setIndexDate
     , SelectionMode
-    , initFromDate
     )
 
 {-| This module provides a styled date picker for Elm.
@@ -19,7 +18,7 @@ calendars. See the documentation there for any specific handling of the `Date` t
 
 # Tea / Initialization
 
-@docs Msg, init, update, Model
+@docs Msg, init, initFromDate, update, Model
 
 
 # Rendering and Settings
