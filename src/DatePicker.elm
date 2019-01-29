@@ -1,5 +1,5 @@
 module DatePicker exposing
-    ( Msg(..), init, update, Model
+    ( Msg(..), init, initFromDate, update, Model
     , view, Props, defaultProps
     , setIndexDate
     , SelectionMode
@@ -213,6 +213,23 @@ init id =
       }
     , Task.perform GetToday Date.today
     )
+
+
+{-| Initialize a date picker given a date to start from.
+-}
+initFromDate : String -> Date -> Model
+initFromDate id date =
+    setIndexDate { id = id
+    , today = Just date
+    , indexDate = Nothing
+    , currentMonthMap = Nothing
+    , previousMonthMap = Nothing
+    , selectedDate = Nothing
+    , previousSelectedDate = Nothing
+    , monthChange = None
+    , selectionMode = Calendar
+    , yearList = Just (defaultedYearList Nothing date)
+    } date
 
 
 {-| Use `DatePicker.update` to create updated date picker models from any message events.

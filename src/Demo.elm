@@ -3,6 +3,7 @@ module Demo exposing (Model, Msg(..), init, main, subscriptions, update, view)
 import Browser
 import Date exposing (..)
 import DatePicker exposing (Msg(..))
+import Time exposing (Month(..))
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -33,6 +34,18 @@ init flags =
       , selectedDate = Nothing
       }
     , Cmd.map DatePickerMsg datePickerCmd
+    )
+
+initFromApolloLanding : Flags -> ( Model, Cmd Msg )
+initFromApolloLanding flags =
+    let
+        datePickerData =
+            DatePicker.initFromDate "my-datepicker" (fromCalendarDate 1969 Jul 20)
+    in
+    ( { datePickerData = datePickerData
+      , selectedDate = Nothing
+      }
+    , Cmd.none
     )
 
 
