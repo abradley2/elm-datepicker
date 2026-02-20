@@ -3,7 +3,7 @@
     "name": "abradley2/elm-datepicker",
     "summary": "A well-styled, configurable, and feature rich date picker",
     "license": "MIT",
-    "version": "4.1.0",
+    "version": "4.1.1",
     "exposed-modules": [
         "DatePicker"
     ],
@@ -13,7 +13,7 @@
         "elm/core": "1.0.0 <= v < 2.0.0",
         "elm/html": "1.0.0 <= v < 2.0.0",
         "elm/time": "1.0.0 <= v < 2.0.0",
-        "justinmimbs/date": "3.0.0 <= v < 4.0.0"
+        "justinmimbs/date": "3.0.0 <= v < 5.0.0"
     },
     "test-dependencies": {}
 }
